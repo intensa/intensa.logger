@@ -13,7 +13,7 @@
 
 Далее заходим в административную часть проекта и устанавливаем модуль
 
-![1538638880521.jpg](https://bitbucket.org/repo/oLyggnM/images/762762811-1538638880521.jpg)
+![1538638880521.jpg](https://imgur.com/lz6wUaM)
 
 *При установке модуля производятся следующие действия:*
 
@@ -32,9 +32,6 @@
 * Проблема с правами директории - для корректной работы модуля у директории должны быть права 0775
 * Также возможны ошибки при создании почтовых оповещений
 
-### Структура модуля ###
-
-![1538636899959.jpg](https://bitbucket.org/repo/oLyggnM/images/2554192409-1538636899959.jpg)
 
 ### Классы ###
 class \Intensa\Logger\ILog - класс реализующий в себе основной функционал модуля.
@@ -48,7 +45,7 @@ class \Intensa\Logger\Settings - синглтон для получения да
 Все настройки модуля располагаются в файле logger.config.php
 
 ```
-#!php
+
 <?php
 return $config = [
     'LOG_DIR' => '/logs/', // основная директория для логов
@@ -72,7 +69,7 @@ return $config = [
 *Пример использования* 
 
 ```
-#!php
+
 $this->settings = Settings::getInstance();
 
 ```
@@ -109,8 +106,6 @@ $this->settings = Settings::getInstance();
 **Крайне рекомендую использовать данный подход при создании объекта логгера.**
 
 ```
-#!php
-
 <?
 if (CModule::IncludeModule('intensa.logger'))
 {
@@ -123,8 +118,6 @@ if (CModule::IncludeModule('intensa.logger'))
 
 
 ```
-#!php
-
 <?
 
 // подключение модуля
@@ -180,7 +173,6 @@ $logger->fatal('fatal message', [0 => 'context']);
 ### Использование логгера при создании заявки ###
 
 ```
-#!php
 
 <?
 $ticketData = ['name' => 'John', 'sname' => 'Smith', 'phone' => '8000'];
@@ -212,8 +204,6 @@ catch (Exception $e)
 
 
 ```
-#!php
-
 <?
 if (CModule::IncludeModule('intensa.logger'))
 {	
@@ -261,7 +251,6 @@ else
 
 
 ```
-#!php
 
 <?
 
@@ -309,7 +298,7 @@ $logger->startTimer('dont_stop');
 USE_BACKTRACE в конфиге или если вызван метод useBacktrace()
 
 ```
-#!log
+
 ==============================[START: 9538]==============================
 [2018-10-08 16:15:47] [:info] [/var/www/html/test/ish.php:11] Логируем какие-то данные Array
 (
@@ -364,7 +353,7 @@ USE_BACKTRACE в конфиге или если вызван метод useBackt
 
 # Формат логов #
 
-![1538659123766.jpg](https://bitbucket.org/repo/oLyggnM/images/4285095387-1538659123766.jpg)
+![1538659123766.jpg](https://imgur.com/D8xgiG5)
 
 На скрине описан шаблон записи лога. 
 
