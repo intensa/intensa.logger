@@ -53,8 +53,7 @@ class ILogTimer
             'EXEC_TIME' => number_format($this->execTime, 9),
         ];
 
-        if (!empty($this->startPoint) || !empty($this->endPoint))
-        {
+        if (!empty($this->startPoint) || !empty($this->endPoint)) {
             $data['START_POINT'] = $this->startPoint;
             $data['STOP_POINT'] = $this->endPoint;
         }

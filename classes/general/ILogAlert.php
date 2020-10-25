@@ -1,4 +1,5 @@
 <?php
+
 namespace Intensa\Logger;
 
 
@@ -13,7 +14,7 @@ class ILogAlert
     public function __construct(ILog $obj)
     {
         $this->settings = Settings::getInstance();
-        $this->objILog= $obj;
+        $this->objILog = $obj;
         $this->buildMessage();
         $this->buildSubject();
     }
@@ -23,14 +24,14 @@ class ILogAlert
         $arMessage = [];
         $execFilePath = $this->objILog->getExecPathFile();
 
-        if ($execFilePath)
-        {
+        if ($execFilePath) {
             $arMessage[] = 'Файл вызова: <b>' . $execFilePath . '</b>';
         }
 
         $arMessage[] = 'Код лога: <b>' . $this->objILog->getLoggerCode() . '</b>'; // код лога
         $arMessage[] = 'Пусть к файлу лога: <b>' . $this->objILog->getWritePathFile() . '</b>'; // путь к файлу лога
-        $arMessage[] = 'Данные: <br/><i>' . implode('<br>', $this->objILog->getLogDataItems()) . '</i>'; // сообщений лога
+        $arMessage[] = 'Данные: <br/><i>' . implode('<br>',
+                $this->objILog->getLogDataItems()) . '</i>'; // сообщений лога
 
         $this->message = implode('<br>', $arMessage);
     }
@@ -65,8 +66,7 @@ class ILogAlert
 
     public function send()
     {
-        if (!empty($this->settings->DEFAULT_EMAIL()))
-        {
+        if (!empty($this->settings->DEFAULT_EMAIL())) {
             $arEventFields = [
                 'EMAIL_TO' => $this->getEmails(),
                 'SUBJECT' => $this->subject,

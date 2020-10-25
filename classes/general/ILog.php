@@ -1,4 +1,5 @@
 <?php
+
 namespace Intensa\Logger;
 
 /**
@@ -111,17 +112,19 @@ class ILog
         $this->loggerCode = (!empty($code)) ? str_replace(['/', '\\'], '_', $code) : 'common';
         $this->identifier = getmypid();
 
-        if ($this->settings->USE_DELIMITER() === true)
+        if ($this->settings->USE_DELIMITER() === true) {
             $this->useDelimiter = true;
+        }
 
 
-        if ($this->settings->USE_BACKTRACE() === true)
+        if ($this->settings->USE_BACKTRACE() === true) {
             $this->useBacktrace = true;
+        }
 
-        if (defined('SITE_CHARSET'))
-        {
-            if (SITE_CHARSET === 'windows-1251')
+        if (defined('SITE_CHARSET')) {
+            if (SITE_CHARSET === 'windows-1251') {
                 $this->convertCP1251 = true;
+            }
         }
     }
 
@@ -129,34 +132,27 @@ class ILog
      * Инициализация директории для логов вида logs/{current_date}/.
      * Если директории текущего дня еще не существует, то создает.
      * Созданной папке устанавливаются права 0777.
-     * @throws
      * @return bool|string
+     * @throws
      */
     public function initLogDir()
     {
-        if ($this->initLogDir === false)
-        {
+        if ($this->initLogDir === false) {
             $path = $this->getLogDirPath();
             //var_dump($path);
             $day = date('Y-m-d');
             $currentDayLogDir = $path . $day;
 
-            if (file_exists($currentDayLogDir))
-            {
+            if (file_exists($currentDayLogDir)) {
                 $this->initLogDir = $currentDayLogDir;
-            }
-            else
-            {
+            } else {
                 $createDir = mkdir($currentDayLogDir, 0777, true);
 
-                if ($createDir)
-                {
+                if ($createDir) {
                     chmod($currentDayLogDir, 0777);
                     chown($currentDayLogDir, 'www-data');
                     $this->initLogDir = $currentDayLogDir;
-                }
-                else
-                {
+                } else {
                     throw new \Exception('Failed to create date folder. Check root path logs dif');
                 }
             }
@@ -175,17 +171,17 @@ class ILog
 
     /**
      * Возвращает полный путь к основной папке логов.
-     * @todo: Возможно стоит сделать возможность самостоятельно устанавливать полный путь.
      * @return string
+     * @todo: Возможно стоит сделать возможность самостоятельно устанавливать полный путь.
      */
     protected function getLogDirPath()
     {
-        $logDirPath =  $_SERVER['DOCUMENT_ROOT'] . $this->settings->LOG_DIR();
+        $logDirPath = $_SERVER['DOCUMENT_ROOT'] . $this->settings->LOG_DIR();
 
-        if (!empty($this->settings->OWN_LOG_DIR()))
-        {
-            if (file_exists($this->settings->OWN_LOG_DIR()) && is_writable($this->settings->OWN_LOG_DIR()))
+        if (!empty($this->settings->OWN_LOG_DIR())) {
+            if (file_exists($this->settings->OWN_LOG_DIR()) && is_writable($this->settings->OWN_LOG_DIR())) {
                 $logDirPath = $this->settings->OWN_LOG_DIR();
+            }
         }
 
         return $logDirPath;
@@ -198,12 +194,9 @@ class ILog
      */
     protected function getLogFileName()
     {
-        if ($this->settings->LOG_FILE_EXTENSION())
-        {
+        if ($this->settings->LOG_FILE_EXTENSION()) {
             $name = $this->loggerCode . $this->settings->LOG_FILE_EXTENSION();
-        }
-        else
-        {
+        } else {
             $name = $this->loggerCode . '.txt';
         }
 
@@ -230,21 +223,18 @@ class ILog
      */
     public function getLogDir($additionalDir = false)
     {
-        $path = $this->initLogDir() . '{space}' ;
+        $path = $this->initLogDir() . '{space}';
 
-        if (!empty($additionalDir) && $additionalDir !== false)
-        {
+        if (!empty($additionalDir) && $additionalDir !== false) {
             $path = str_replace('{space}', '/' . $additionalDir . '/', $path);
 
-            if (!file_exists($path))
-            {
+            if (!file_exists($path)) {
                 $mkdir = mkdir($path, 0777, true);
-                if ($mkdir)
+                if ($mkdir) {
                     chmod($path, 0777);
+                }
             }
-        }
-        else
-        {
+        } else {
             $path = str_replace('{space}', '/', $path);
         }
 
@@ -252,13 +242,12 @@ class ILog
     }
 
     /**
-     * @uses пока не используется
      * @param $dirName
+     * @uses пока не используется
      */
     public function setAdditionalDir($dirName)
     {
-        if (!empty($dirName) && $this->enableConstantDir === false)
-        {
+        if (!empty($dirName) && $this->enableConstantDir === false) {
             $this->additionalDir = $dirName;
         }
     }
@@ -268,13 +257,14 @@ class ILog
      */
     public function unsetAdditionalDir()
     {
-        if ($this->enableConstantDir === false)
+        if ($this->enableConstantDir === false) {
             $this->additionalDir = false;
+        }
     }
 
     /**
-     * @uses пока не используется
      * @param $dirName
+     * @uses пока не используется
      */
     public function dir($dirName)
     {
@@ -296,8 +286,7 @@ class ILog
         $date = '[' . date($this->dateFormat) . ']';
         $level = '[:' . $this->getLogLevel($level) . ']';
 
-        if ($this->useDelimiter === false)
-        {
+        if ($this->useDelimiter === false) {
             $level .= ' [ pid:' . $this->identifier . ']';
         }
 
@@ -305,25 +294,23 @@ class ILog
         $message = (!empty($msg)) ? $msg : '';
         $logContext = '';
 
-        if ($this->useBacktrace)
-        {
+        if ($this->useBacktrace) {
             $execLogMethodFileData = $this->backtrace();
             $this->execPathFile = $execLogMethodFileData['file'];
 
-            if (!empty($execLogMethodFileData))
-            {
+            if (!empty($execLogMethodFileData)) {
                 $strBacktraceData = implode(':', $execLogMethodFileData);
 
                 // @crunch: маленький костыль для таймера выполнения. чтобы лишний раз не вызывать backtrace();
-                if (is_array($context) && array_key_exists('STOP_POINT', $context) && empty($context['STOP_POINT']))
+                if (is_array($context) && array_key_exists('STOP_POINT', $context) && empty($context['STOP_POINT'])) {
                     $context['STOP_POINT'] = $strBacktraceData;
+                }
 
                 $file = '[' . $strBacktraceData . ']';
             }
         }
 
-        if (!empty($context))
-        {
+        if (!empty($context)) {
             $logContext = (is_array($context) || is_object($context)) ? print_r($context, 1) : $context;
         }
 
@@ -335,12 +322,12 @@ class ILog
             $logContext
         ];
 
-        $logString = str_replace(['{date}', '{level}', '{file}', '{message}', '{context}'], $logData, $this->logTemplate) . PHP_EOL;
+        $logString = str_replace(['{date}', '{level}', '{file}', '{message}', '{context}'], $logData,
+                $this->logTemplate) . PHP_EOL;
 
         $this->setLogItem($logString);
 
-        if ($additionalDir !== false)
-        {
+        if ($additionalDir !== false) {
             $this->setLogItemAdditionalDir($additionalDir);
         }
         //$this->unsetAdditionalDir();
@@ -372,12 +359,10 @@ class ILog
      */
     protected function writeFile()
     {
-        if (!empty($this->logData['ITEMS']))
-        {
+        if (!empty($this->logData['ITEMS'])) {
             $strLogData = implode('', $this->logData['ITEMS']);
 
-            if ($this->useDelimiter)
-            {
+            if ($this->useDelimiter) {
                 $dl = $this->getLogDelimiter();
                 $strLogData = $dl['start'] . $strLogData . $dl['end'];
             }
@@ -385,22 +370,19 @@ class ILog
             $additionalDir = (!empty($this->logData['ADDITIONAL_DIR'])) ? $this->logData['ADDITIONAL_DIR'] : false;
             $canWrite = true;
 
-            try
-            {
+            try {
                 $pathFile = $this->getLogDir($additionalDir) . $this->getLogFileName();
                 $this->writePathFile = $pathFile;
 
-            }
-            catch (\Exception $e)
-            {
+            } catch (\Exception $e) {
                 //если есть проблема с инициализацией папки, не пишем. Письма отправим.
                 $canWrite = false;
             }
 
-            if ($canWrite)
-            {
-                if ($this->convertCP1251)
+            if ($canWrite) {
+                if ($this->convertCP1251) {
                     $strLogData = iconv('windows-1251', 'utf-8', $strLogData);
+                }
 
                 file_put_contents($pathFile, $strLogData, FILE_APPEND);
                 chmod($pathFile, 0777);
@@ -420,8 +402,7 @@ class ILog
     {
         if (!is_array($email)) {
             $this->additionalAlertEmails = array_merge($this->additionalAlertEmails, $email);
-        }
-        else {
+        } else {
             $this->additionalAlertEmails[] = $email;
         }
 
@@ -491,11 +472,10 @@ class ILog
     public function backtrace()
     {
         $return = [];
-        $backtraceData = debug_backtrace(FALSE, 3);
+        $backtraceData = debug_backtrace(false, 3);
         $execMethodRecord = array_pop($backtraceData);
 
-        if (!empty($execMethodRecord) && is_array($execMethodRecord))
-        {
+        if (!empty($execMethodRecord) && is_array($execMethodRecord)) {
             $return = ['file' => $execMethodRecord['file'], 'line' => $execMethodRecord['line']];
         }
 
@@ -522,8 +502,7 @@ class ILog
     {
         $objLoggerTimer = new ILogTimer($timerCode);
 
-        if ($this->useBacktrace)
-        {
+        if ($this->useBacktrace) {
             $startPoint = implode(':', $this->backtrace());
             $objLoggerTimer->setStartPoint($startPoint);
         }
@@ -539,13 +518,13 @@ class ILog
      */
     public function stopTimer($timerCode = false, $autoStop = false)
     {
-        if (array_key_exists($timerCode, $this->timers))
-        {
+        if (array_key_exists($timerCode, $this->timers)) {
             $currentTimer = $this->timers[$timerCode];
             $timerData = $currentTimer->stop()->getTimerData();
 
-            if ($autoStop)
+            if ($autoStop) {
                 $timerData['STOP_POINT'] = '__destruct';
+            }
 
             $this->write(6, 'Lead time:', $timerData);
         }
@@ -557,17 +536,16 @@ class ILog
      */
     public function __call($name, $arguments)
     {
-        if ($name === 'log')
+        if ($name === 'log') {
             $name = 'info';
+        }
 
         $logLevelCode = array_search($name, $this->logLevel);
 
-        if ($logLevelCode !== false)
-        {
+        if ($logLevelCode !== false) {
             $additionalFolder = false;
 
-            if ($name === 'fatal')
-            {
+            if ($name === 'fatal') {
                 $additionalFolder = 'error';
                 $this->sendAlert();
             }
@@ -584,12 +562,9 @@ class ILog
      */
     function __destruct()
     {
-        if (!empty($this->timers))
-        {
-            foreach ($this->timers as $timerCode => $objTimer)
-            {
-                if ($objTimer instanceof ILogTimer && !$objTimer->isDie())
-                {
+        if (!empty($this->timers)) {
+            foreach ($this->timers as $timerCode => $objTimer) {
+                if ($objTimer instanceof ILogTimer && !$objTimer->isDie()) {
                     $this->stopTimer($timerCode, true);
                 }
             }

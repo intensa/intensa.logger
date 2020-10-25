@@ -21,6 +21,7 @@ class Settings
 {
     protected $settings = [];
     private static $instance = null;
+
     //public $test;
 
     private function __construct()
@@ -28,12 +29,11 @@ class Settings
         $settingsFilePath = __DIR__ . '/../../logger.config.php';
         $settingsFile = include_once(realpath($settingsFilePath));
 
-        if (!$settingsFile && !is_array($settingsFile))
-        {
+        if (!$settingsFile && !is_array($settingsFile)) {
             //throw new \Exception('Проблемы с определением настроек системы');
-        }
-        else
+        } else {
             $this->settings = $settingsFile;
+        }
 
     }
 
@@ -44,8 +44,7 @@ class Settings
 
     static function getInstance()
     {
-        if (is_null(self::$instance))
-        {
+        if (is_null(self::$instance)) {
             self::$instance = new self();
         }
 
