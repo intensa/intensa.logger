@@ -17,7 +17,7 @@ class ILog
     /**
      * @var string
      */
-    protected $logTemplate = "{date} {level} {file} {message} {context}";
+    protected $logTemplate = "{date}{level}{file} {message} {context}";
 
     /**
      * @var array
@@ -325,12 +325,12 @@ class ILog
         $logString = str_replace(['{date}', '{level}', '{file}', '{message}', '{context}'], $logData,
                 $this->logTemplate) . PHP_EOL;
 
-        $this->setLogItem($logString);
+        //$this->setLogItem($logString);
+        $this->instantWriteFile($logString);
 
         if ($additionalDir !== false) {
             $this->setLogItemAdditionalDir($additionalDir);
         }
-        //$this->unsetAdditionalDir();
     }
 
     /**
@@ -354,6 +354,42 @@ class ILog
         return $this->execPathFile;
     }
 
+    protected function instantWriteFile($strLogData)
+    {
+        $additionalDir = (!empty($this->logData['ADDITIONAL_DIR'])) ? $this->logData['ADDITIONAL_DIR'] : false;
+        $canWrite = true;
+
+        try {
+            $pathFile = $this->getLogDir($additionalDir) . $this->getLogFileName();
+            $this->writePathFile = $pathFile;
+
+        } catch (\Exception $e) {
+            //если есть проблема с инициализацией папки, не пишем. Письма отправим.
+            $canWrite = false;
+        }
+
+        if ($canWrite) {
+            if ($this->convertCP1251) {
+                $strLogData = iconv('windows-1251', 'utf-8', $strLogData);
+            }
+
+            $openFile = fopen($pathFile, 'a');
+            $write = fwrite($openFile, $strLogData);
+            fclose($openFile);
+            //chmod($pathFile, 0777);
+        }
+
+        if ($this->sendAlert) {
+            $objILogAlert = new ILogAlert($this);
+
+            if (!empty($this->additionalAlertEmails)) {
+                $objILogAlert->setAdditionalEmail($this->additionalAlertEmails);
+            }
+
+            $objILogAlert->send();
+        }
+    }
+
     /**
      * Записывает сообщения лога в файл.
      */
@@ -367,36 +403,10 @@ class ILog
                 $strLogData = $dl['start'] . $strLogData . $dl['end'];
             }
 
-            $additionalDir = (!empty($this->logData['ADDITIONAL_DIR'])) ? $this->logData['ADDITIONAL_DIR'] : false;
-            $canWrite = true;
 
-            try {
-                $pathFile = $this->getLogDir($additionalDir) . $this->getLogFileName();
-                $this->writePathFile = $pathFile;
-
-            } catch (\Exception $e) {
-                //если есть проблема с инициализацией папки, не пишем. Письма отправим.
-                $canWrite = false;
-            }
-
-            if ($canWrite) {
-                if ($this->convertCP1251) {
-                    $strLogData = iconv('windows-1251', 'utf-8', $strLogData);
-                }
-
-                file_put_contents($pathFile, $strLogData, FILE_APPEND);
-                chmod($pathFile, 0777);
-            }
-
-            if ($this->sendAlert) {
-                $objILogAlert = new ILogAlert($this);
-                if (!empty($this->additionalAlertEmails)) {
-                    $objILogAlert->setAdditionalEmail($this->additionalAlertEmails);
-                }
-                $objILogAlert->send();
-            }
         }
     }
+
 
     public function setAlertEmail($email)
     {
@@ -570,7 +580,8 @@ class ILog
             }
         }
 
-        $this->writeFile();
+        // @todo тут вызов закрытия разделителя
+        //$this->writeFile();
     }
 
 }
