@@ -4,7 +4,11 @@ require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.ph
 
 CModule::IncludeModule('intensa.logger');
 
+$rd = new \Intensa\Logger\ILogReader();
+$rd->getDirectories();
 
+
+die();
 $obj = new \Intensa\Logger\ILog('ss');
 $obj->setAdditionalDir('add');
 $obj->startTimer('start');
