@@ -5,16 +5,17 @@ require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.ph
 CModule::IncludeModule('intensa.logger');
 
 $rd = new \Intensa\Logger\ILogReader();
-$rd->getDirectories();
+$dir = $rd->getDirectoryItems('/mnt/d/www/tis.local/logs/2021-03-21/add');
+var_dump($dir);
 
 
-die();
-$obj = new \Intensa\Logger\ILog('ss');
+
+$obj = new \Intensa\Logger\ILog('ss2');
 $obj->setAdditionalDir('add');
 $obj->startTimer('start');
 $obj->log('11', 1211);
 $obj->log('22', 22211);
-$obj->log('33', 32311);
+$obj->fatal('33', 32311);
 
 
 die();
