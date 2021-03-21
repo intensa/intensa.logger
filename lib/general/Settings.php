@@ -7,12 +7,13 @@ namespace Intensa\Logger;
  * @method string LOG_DIR()
  * @method string LOG_FILE_EXTENSION()
  * @method string DATE_FORMAT()
- * @method boolean USE_BACKTRACE()
- * @method boolean DEV_MODE()
+ * @method string USE_BACKTRACE()
+ * @method string DEV_MODE()
  * @method string CEVENT_TYPE()
  * @method string CEVENT_MESSAGE()
- * @method boolean USE_CP1251()
+ * @method string USE_CP1251()
  * @method string ALERT_EMAIL()
+ * @method string WRITE_JSON()
  * @package Intensa\Logger
  */
 class Settings
@@ -29,6 +30,7 @@ class Settings
         'CEVENT_MESSAGE',
         'USE_CP1251',
         'ALERT_EMAIL',
+        'WRITE_JSON'
     ];
 
     private function __construct()

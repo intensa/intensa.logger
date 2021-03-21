@@ -185,9 +185,13 @@ class ILog
      */
     protected function getLogFileName()
     {
-        if ($this->settings->LOG_FILE_EXTENSION()) {
+        if ($this->settings->WRITE_JSON()) {
+            $name = $this->loggerCode . '.json.log';
+        }
+        elseif ($this->settings->LOG_FILE_EXTENSION()) {
             $name = $this->loggerCode . $this->settings->LOG_FILE_EXTENSION();
-        } else {
+        }
+        else {
             $name = $this->loggerCode . '.txt';
         }
 
@@ -243,36 +247,8 @@ class ILog
         }
     }
 
-    /**
-     * @uses пока не используется
-     */
-    public function unsetAdditionalDir()
-    {
-        if ($this->enableConstantDir === false) {
-            $this->additionalDir = false;
-        }
-    }
 
-    /**
-     * @param $dirName
-     * @uses пока не используется
-     */
-    public function dir($dirName)
-    {
-        $this->enableConstantDir = true;
-        $this->additionalDir = $dirName;
-    }
-
-
-    /**
-     * Метод формирует сообщение лога согласно шаблону и добавляет сообщение в свойство $this->logData
-     * по средствам метода $this->setLogItemAdditionalDir()
-     * @param int $level уровень лога
-     * @param bool $msg сообщение
-     * @param bool $context доп. информация
-     * @param bool|string $additionalDir имя доп. директории
-     */
-    public function write($level, $msg = false, $context = false, $additionalDir = false)
+    protected function prepareRecordHumanFormat($level, $msg = false, $context = false)
     {
         $date = '[' . date($this->dateFormat) . ']';
         $level = '[:' . $this->getLogLevel($level) . ']';
@@ -313,6 +289,55 @@ class ILog
 
         $logString = str_replace(['{date}', '{level}', '{pid}', '{file}', '{message}', '{context}'], $logData,
                 $this->logTemplate) . PHP_EOL;
+
+        return $logString;
+    }
+
+    public function prepareRecordJsonFormat($level, $msg = false, $context = false)
+    {
+        $return = '';
+        $logItems = [
+            'time' => date($this->dateFormat),
+            'level' => $this->getLogLevel($level),
+            'pid' => $this->identifier,
+            'msg' => $msg,
+            'context' => $context
+        ];
+
+        if ($this->useBacktrace) {
+            $execLogMethodFileData = $this->backtrace();
+            $this->execPathFile = $execLogMethodFileData['file'];
+
+            if (!empty($execLogMethodFileData)) {
+                $strBacktraceData = implode(':', $execLogMethodFileData);
+                $logItems['file'] = $strBacktraceData;
+            }
+        }
+
+        $jsonEncodeRecord = json_encode($logItems);
+
+        if (!empty($jsonEncodeRecord)) {
+            $jsonEncodeRecord .= PHP_EOL;
+        }
+
+        return $jsonEncodeRecord;
+    }
+
+    /**
+     * Метод формирует сообщение лога согласно шаблону и добавляет сообщение в свойство $this->logData
+     * по средствам метода $this->setLogItemAdditionalDir()
+     * @param int $level уровень лога
+     * @param bool $msg сообщение
+     * @param bool $context доп. информация
+     * @param bool|string $additionalDir имя доп. директории
+     */
+    public function write($level, $msg = false, $context = false)
+    {
+        if ($this->settings->WRITE_JSON()) {
+            $logString = $this->prepareRecordJsonFormat($level, $msg, $context);
+        } else {
+            $logString = $this->prepareRecordHumanFormat($level, $msg, $context);
+        }
 
         $this->instantWriteFile($logString);
     }

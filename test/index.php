@@ -5,13 +5,11 @@ require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.ph
 CModule::IncludeModule('intensa.logger');
 
 
-$obj = new \Intensa\Logger\ILog('my_test');
+$obj = new \Intensa\Logger\ILog('ss');
 $obj->setAdditionalDir('add');
 $obj->startTimer('start');
 $obj->log('11', 1211);
-
 $obj->log('22', 22211);
-
 $obj->log('33', 32311);
 
 

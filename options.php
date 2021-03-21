@@ -19,9 +19,16 @@ function ShowParamsHTMLByarray($arParams)
         __AdmSettingsDrawRow(ADMIN_MODULE_NAME, $Option);
     }
 }
-if (isset($_REQUEST['save']) && check_bitrix_sessid()) {
+$mayEmptyProps = [
+    'LOGGER_USE_BACKTRACE',
+    'LOGGER_DEV_MODE',
+    'LOGGER_USE_CP1251',
+    'LOGGER_WRITE_JSON',
+];
 
+if (isset($_REQUEST['save']) && check_bitrix_sessid()) {
     foreach ($_POST as $key => $option) {
+
         if (strpos($key, 'LOGGER_') !== false) {
             if (is_array($option)) {
                 $option = implode(',', $option);
@@ -34,6 +41,12 @@ if (isset($_REQUEST['save']) && check_bitrix_sessid()) {
             }
 
             COption::SetOptionString(ADMIN_MODULE_NAME, str_replace('LOGGER_', '', $key), $option);
+        }
+    }
+
+    foreach ($mayEmptyProps as $mayEmptyProp) {
+        if (!isset($_POST[$mayEmptyProp])) {
+            COption::SetOptionString(ADMIN_MODULE_NAME, str_replace('LOGGER_', '', $mayEmptyProp), '');
         }
     }
 }
@@ -103,6 +116,12 @@ $arAllOptions = [
         getMessage('ALERT_EMAIL'),
         COption::GetOptionString(ADMIN_MODULE_NAME, 'ALERT_EMAIL', COption::GetOptionString("main", "email_from")),
         ['text']
+    ],
+    [
+        'WRITE_JSON',
+        getMessage('WRITE_JSON'),
+        COption::GetOptionString(ADMIN_MODULE_NAME, 'WRITE_JSON', 'N'),
+        ['checkbox']
     ],
 ];
 ?>
