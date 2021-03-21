@@ -1,1 +1,3 @@
 .idea/
+logger.config.php
+temp_logs/

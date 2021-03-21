@@ -51,7 +51,7 @@ class ILogAlert
 
     protected function getEmails()
     {
-        $emails = $this->settings->DEFAULT_EMAIL();
+        $emails = $this->settings->ALERT_EMAIL();
 
         // добавим дополнительные адреса
         if (!empty($this->additionalEmail) && is_array($this->additionalEmail)) {

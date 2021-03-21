@@ -17,7 +17,7 @@ class ILog
     /**
      * @var string
      */
-    protected $logTemplate = "{date}{level}{file} {message} {context}";
+    protected $logTemplate = "{date}{level}{pid}{file} {message} {context}";
 
     /**
      * @var array
@@ -70,15 +70,14 @@ class ILog
      * @var bool|int
      */
     protected $identifier = false;
-    /**
-     * @var bool
-     */
-    protected $useDelimiter = false;
 
     /**
      * @var bool
      */
     protected $writePathFile = false;
+    /**
+     * @var bool
+     */
     protected $execPathFile = false;
     /**
      * @var bool
@@ -105,6 +104,10 @@ class ILog
 
     protected $additionalAlertEmails = [];
 
+    /**
+     * ILog constructor.
+     * @param false $code
+     */
     public function __construct($code = false)
     {
         $this->settings = Settings::getInstance();
@@ -112,12 +115,7 @@ class ILog
         $this->loggerCode = (!empty($code)) ? str_replace(['/', '\\'], '_', $code) : 'common';
         $this->identifier = getmypid();
 
-        if ($this->settings->USE_DELIMITER() === true) {
-            $this->useDelimiter = true;
-        }
-
-
-        if ($this->settings->USE_BACKTRACE() === true) {
+        if ($this->settings->USE_BACKTRACE() === 'Y') {
             $this->useBacktrace = true;
         }
 
@@ -177,13 +175,6 @@ class ILog
     protected function getLogDirPath()
     {
         $logDirPath = $_SERVER['DOCUMENT_ROOT'] . $this->settings->LOG_DIR();
-
-        if (!empty($this->settings->OWN_LOG_DIR())) {
-            if (file_exists($this->settings->OWN_LOG_DIR()) && is_writable($this->settings->OWN_LOG_DIR())) {
-                $logDirPath = $this->settings->OWN_LOG_DIR();
-            }
-        }
-
         return $logDirPath;
     }
 
@@ -242,8 +233,8 @@ class ILog
     }
 
     /**
+     * Метод позволяет задать дополнительную директорию для логгера
      * @param $dirName
-     * @uses пока не используется
      */
     public function setAdditionalDir($dirName)
     {
@@ -285,10 +276,7 @@ class ILog
     {
         $date = '[' . date($this->dateFormat) . ']';
         $level = '[:' . $this->getLogLevel($level) . ']';
-
-        if ($this->useDelimiter === false) {
-            $level .= ' [ pid:' . $this->identifier . ']';
-        }
+        $pid = '[pid:' . $this->identifier . ']';
 
         $file = '';
         $message = (!empty($msg)) ? $msg : '';
@@ -317,20 +305,16 @@ class ILog
         $logData = [
             $date,
             $level,
+            $pid,
             $file,
             $message,
             $logContext
         ];
 
-        $logString = str_replace(['{date}', '{level}', '{file}', '{message}', '{context}'], $logData,
+        $logString = str_replace(['{date}', '{level}', '{pid}', '{file}', '{message}', '{context}'], $logData,
                 $this->logTemplate) . PHP_EOL;
 
-        //$this->setLogItem($logString);
         $this->instantWriteFile($logString);
-
-        if ($additionalDir !== false) {
-            $this->setLogItemAdditionalDir($additionalDir);
-        }
     }
 
     /**
@@ -349,14 +333,21 @@ class ILog
         return $this->writePathFile;
     }
 
+    /**
+     * @return bool
+     */
     public function getExecPathFile()
     {
         return $this->execPathFile;
     }
 
+    /**
+     * Записывает в файл
+     * @param $strLogData
+     */
     protected function instantWriteFile($strLogData)
     {
-        $additionalDir = (!empty($this->logData['ADDITIONAL_DIR'])) ? $this->logData['ADDITIONAL_DIR'] : false;
+        $additionalDir = $this->additionalDir;
         $canWrite = true;
 
         try {
@@ -374,9 +365,8 @@ class ILog
             }
 
             $openFile = fopen($pathFile, 'a');
-            $write = fwrite($openFile, $strLogData);
+            fwrite($openFile, $strLogData);
             fclose($openFile);
-            //chmod($pathFile, 0777);
         }
 
         if ($this->sendAlert) {
@@ -390,24 +380,12 @@ class ILog
         }
     }
 
+
     /**
-     * Записывает сообщения лога в файл.
+     * Через этот метод можно установить дополнительный email для получения алертов
+     * @param $email
+     * @return $this
      */
-    protected function writeFile()
-    {
-        if (!empty($this->logData['ITEMS'])) {
-            $strLogData = implode('', $this->logData['ITEMS']);
-
-            if ($this->useDelimiter) {
-                $dl = $this->getLogDelimiter();
-                $strLogData = $dl['start'] . $strLogData . $dl['end'];
-            }
-
-
-        }
-    }
-
-
     public function setAlertEmail($email)
     {
         if (!is_array($email)) {
@@ -425,38 +403,6 @@ class ILog
     public function sendAlert()
     {
         $this->sendAlert = true;
-    }
-
-    /**
-     * @param $item
-     */
-    public function setLogItem($item)
-    {
-        $this->logData['ITEMS'][] = $item;
-    }
-
-    /**
-     * @param $dirName
-     */
-    public function setLogItemAdditionalDir($dirName)
-    {
-        $this->logData['ADDITIONAL_DIR'] = $dirName;
-    }
-
-    /**
-     * Заставляет при записи в файл использовать разделители между пачками сообщений в логе
-     */
-    public function useLogDelimiter()
-    {
-        $this->useDelimiter = true;
-    }
-
-    /**
-     *
-     */
-    public function notUseLogDelimiter()
-    {
-        $this->useDelimiter = false;
     }
 
     /**
@@ -492,18 +438,6 @@ class ILog
         return $return;
     }
 
-    /**
-     * Формирует разделитель
-     * @return array
-     */
-    public function getLogDelimiter()
-    {
-        $delimiterChar = str_repeat('=', 30);
-        return [
-            'start' => $delimiterChar . '[START: ' . $this->identifier . ']' . $delimiterChar . PHP_EOL,
-            'end' => $delimiterChar . '[END: ' . $this->identifier . ']' . $delimiterChar . PHP_EOL,
-        ];
-    }
 
     /**
      * @param $timerCode
@@ -550,6 +484,10 @@ class ILog
             $name = 'info';
         }
 
+        if ($name === 'debug' && $this->settings->DEV_MODE() !== 'Y') {
+            return false;
+        }
+
         $logLevelCode = array_search($name, $this->logLevel);
 
         if ($logLevelCode !== false) {
@@ -579,9 +517,6 @@ class ILog
                 }
             }
         }
-
-        // @todo тут вызов закрытия разделителя
-        //$this->writeFile();
     }
 
 }

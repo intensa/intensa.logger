@@ -30,10 +30,10 @@ class intensa_logger extends CModule
     public function __construct()
     {
         $this->MODULE_ID = 'intensa.logger';
-        $this->MODULE_VERSION = '0.0.1';
-        $this->MODULE_VERSION_DATE = '2018-09-28 10:10:10';
-        $this->MODULE_NAME = 'Логирование';
-        $this->MODULE_DESCRIPTION = 'Логирование в файлы';
+        $this->MODULE_VERSION = '0.1.0';
+        $this->MODULE_VERSION_DATE = '2021-03-21 10:10:10';
+        $this->MODULE_NAME = 'IntensaLogger';
+        $this->MODULE_DESCRIPTION = 'Модуль для логирования данных в проекте';
         $this->MODULE_GROUP_RIGHTS = 'N';
         $this->PARTNER_NAME = "Intensa";
         $this->PARTNER_URI = "http://intensa.ru";
