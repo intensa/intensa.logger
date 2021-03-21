@@ -35,8 +35,8 @@ class intensa_logger extends CModule
         $this->MODULE_NAME = 'IntensaLogger';
         $this->MODULE_DESCRIPTION = 'Модуль для логирования данных в проекте';
         $this->MODULE_GROUP_RIGHTS = 'N';
-        $this->PARTNER_NAME = "Intensa";
-        $this->PARTNER_URI = "http://intensa.ru";
+        $this->PARTNER_NAME = 'Intensa';
+        $this->PARTNER_URI = 'http://intensa.ru';
     }
 
     public function doInstall()
