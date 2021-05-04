@@ -20,22 +20,22 @@ class ILogTimer
         $this->timeStart = microtime(true);
     }
 
-    public function setStartPoint($fl)
+    public function setStartPoint($startPoint)
     {
-        $this->startPoint = $fl;
+        $this->startPoint = $startPoint;
     }
 
-    public function setEndPoint($fl)
+    public function setEndPoint($endPoint)
     {
-        $this->endPoint = $fl;
+        $this->endPoint = $endPoint;
     }
 
-    public function isDie()
+    public function isDie(): bool
     {
         return $this->die;
     }
 
-    public function stop()
+    public function stop(): ILogTimer
     {
         $this->timeEnd = microtime(true);
         $this->execTime = $this->timeEnd - $this->timeStart;
@@ -44,7 +44,7 @@ class ILogTimer
         return $this;
     }
 
-    public function getTimerData()
+    public function getTimerData(): array
     {
         $data = [
             'CODE' => $this->timerCode,
@@ -66,17 +66,17 @@ class ILogTimer
         return $this->timeStart;
     }
 
-    public function getTimeEnd()
+    public function getTimeEnd(): int
     {
         return $this->timeEnd;
     }
 
-    public function getExecTime()
+    public function getExecTime(): int
     {
         return $this->execTime;
     }
 
-    public function getTimerCode()
+    public function getTimerCode(): string
     {
         return $this->timerCode;
     }

@@ -49,7 +49,7 @@ class ILogAlert
         }
     }
 
-    protected function getEmails()
+    protected function getEmails(): string
     {
         $emails = $this->settings->ALERT_EMAIL();
 

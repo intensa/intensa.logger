@@ -137,7 +137,6 @@ class ILog
     {
         if ($this->initLogDir === false) {
             $path = $this->getLogDirPath();
-            //var_dump($path);
             $day = date('Y-m-d');
             $currentDayLogDir = $path . $day;
 
@@ -172,10 +171,9 @@ class ILog
      * @return string
      * @todo: Возможно стоит сделать возможность самостоятельно устанавливать полный путь.
      */
-    protected function getLogDirPath()
+    protected function getLogDirPath(): string
     {
-        $logDirPath = $_SERVER['DOCUMENT_ROOT'] . $this->settings->LOG_DIR();
-        return $logDirPath;
+        return $_SERVER['DOCUMENT_ROOT'] . $this->settings->LOG_DIR();
     }
 
     /**
@@ -183,7 +181,7 @@ class ILog
      * и расширения (задается в файле настроек).
      * @return string
      */
-    protected function getLogFileName()
+    protected function getLogFileName(): string
     {
         if ($this->settings->WRITE_JSON()) {
             $name = $this->loggerCode . '.json.log';
@@ -203,7 +201,7 @@ class ILog
      * @param int $code
      * @return mixed
      */
-    public function getLogLevel($code = 1)
+    public function getLogLevel(int $code = 1): string
     {
         $level = (array_key_exists($code, $this->logLevel)) ? $this->logLevel[$code] : $this->logLevel[1];
         return $level;
@@ -215,9 +213,11 @@ class ILog
      * передаем название доп. директории через аргумент $additionalDir
      * @param bool $additionalDir
      * @return mixed|string
+     * @throws \Exception
      */
-    public function getLogDir($additionalDir = false)
+    public function getLogDir($additionalDir = false): string
     {
+
         $path = $this->initLogDir() . '{space}';
 
         if (!empty($additionalDir) && $additionalDir !== false) {
@@ -240,7 +240,7 @@ class ILog
      * Метод позволяет задать дополнительную директорию для логгера
      * @param $dirName
      */
-    public function setAdditionalDir($dirName)
+    public function setAdditionalDir(string $dirName)
     {
         if (!empty($dirName) && $this->enableConstantDir === false) {
             $this->additionalDir = $dirName;
@@ -248,7 +248,7 @@ class ILog
     }
 
 
-    protected function prepareRecordHumanFormat($level, $msg = false, $context = false)
+    protected function prepareRecordHumanFormat($level, $msg = false, $context = false): string
     {
         $date = '[' . date($this->dateFormat) . ']';
         $level = '[:' . $this->getLogLevel($level) . ']';
@@ -295,7 +295,6 @@ class ILog
 
     public function prepareRecordJsonFormat($level, $msg = false, $context = false)
     {
-        $return = '';
         $logItems = [
             'time' => date($this->dateFormat),
             'level' => $this->getLogLevel($level),
@@ -326,12 +325,11 @@ class ILog
     /**
      * Метод формирует сообщение лога согласно шаблону и добавляет сообщение в свойство $this->logData
      * по средствам метода $this->setLogItemAdditionalDir()
-     * @param int $level уровень лога
+     * @param string $level уровень лога
      * @param bool $msg сообщение
      * @param bool $context доп. информация
-     * @param bool|string $additionalDir имя доп. директории
      */
-    public function write($level, $msg = false, $context = false)
+    public function write(string $level, bool $msg = false, bool $context = false)
     {
         if ($this->settings->WRITE_JSON()) {
             $logString = $this->prepareRecordJsonFormat($level, $msg, $context);
@@ -345,7 +343,7 @@ class ILog
     /**
      * @return mixed
      */
-    public function getLogDataItems()
+    public function getLogDataItems(): array
     {
         return $this->logData['ITEMS'];
     }
@@ -353,7 +351,7 @@ class ILog
     /**
      * @return bool
      */
-    public function getWritePathFile()
+    public function getWritePathFile(): bool
     {
         return $this->writePathFile;
     }
@@ -361,7 +359,7 @@ class ILog
     /**
      * @return bool
      */
-    public function getExecPathFile()
+    public function getExecPathFile(): bool
     {
         return $this->execPathFile;
     }
@@ -372,11 +370,10 @@ class ILog
      */
     protected function instantWriteFile($strLogData)
     {
-        $additionalDir = $this->additionalDir;
         $canWrite = true;
 
         try {
-            $pathFile = $this->getLogDir($additionalDir) . $this->getLogFileName();
+            $pathFile = $this->getLogDir($this->additionalDir) . $this->getLogFileName();
             $this->writePathFile = $pathFile;
 
         } catch (\Exception $e) {
@@ -411,7 +408,7 @@ class ILog
      * @param $email
      * @return $this
      */
-    public function setAlertEmail($email)
+    public function setAlertEmail(string $email): ILog
     {
         if (!is_array($email)) {
             $this->additionalAlertEmails = array_merge($this->additionalAlertEmails, $email);
@@ -450,7 +447,7 @@ class ILog
      * Получаем данные о вызове методов логирования в проекте
      * @return array
      */
-    public function backtrace()
+    public function backtrace(): array
     {
         $return = [];
         $backtraceData = debug_backtrace(false, 3);
@@ -500,10 +497,11 @@ class ILog
     }
 
     /**
-     * @param $arguments
+     * @param string $name
+     * @param array $arguments
      * @return bool
      */
-    public function __call($name, $arguments)
+    public function __call(string $name, array $arguments): bool
     {
         if ($name === 'log') {
             $name = 'info';
@@ -523,7 +521,11 @@ class ILog
                 $this->sendAlert();
             }
 
-            $this->write($logLevelCode, $arguments[0], $arguments[1], $additionalFolder);
+            $this->write(
+                $logLevelCode,
+                $arguments[0],
+                $arguments[1]
+            );
             return true;
         }
 

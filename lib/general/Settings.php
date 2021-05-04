@@ -45,7 +45,7 @@ class Settings
     {
     }
 
-    static function getInstance()
+    static function getInstance(): Settings
     {
         if (is_null(self::$instance)) {
             self::$instance = new self();
