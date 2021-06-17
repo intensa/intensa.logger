@@ -1,6 +1,5 @@
 <?php
 use Bitrix\Main\Loader;
-//use Bitrix\Main\EventManager;
 
 Loader::registerAutoLoadClasses('intensa.logger', array(
     'Intensa\Logger\Settings'	=> 'lib/general/Settings.php',
