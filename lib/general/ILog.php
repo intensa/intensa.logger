@@ -40,15 +40,11 @@ class ILog
      * @var bool
      */
     protected $additionalDir = false;
-    /**
-     * @var bool
-     */
-    protected $enableConstantDir = false;
 
     /**
-     * @var bool|mixed|string
+     * @var string
      */
-    protected $loggerCode = false;
+    protected $loggerCode = '';
     /**
      * @var Settings|null
      */
@@ -58,13 +54,6 @@ class ILog
      * @var bool
      */
     protected $initLogDir = false;
-    /**
-     * @var array
-     */
-    protected $logData = [
-        'ITEMS' => [],
-        'ADDITIONAL_DIR' => []
-    ];
 
     /**
      * @var bool|int
@@ -79,10 +68,7 @@ class ILog
      * @var bool
      */
     protected $execPathFile = false;
-    /**
-     * @var bool
-     */
-    protected $sendAlert = false;
+
     /**
      * @var bool
      */
@@ -103,6 +89,8 @@ class ILog
      */
 
     protected $additionalAlertEmails = [];
+    protected $rewriteLogFile = false;
+    protected $execLogCount = 0;
 
     /**
      * ILog constructor.
@@ -242,9 +230,15 @@ class ILog
      */
     public function setAdditionalDir(string $dirName)
     {
-        if (!empty($dirName) && $this->enableConstantDir === false) {
+        if (!empty($dirName)) {
             $this->additionalDir = $dirName;
         }
+    }
+
+    public function rewrite()
+    {
+        $this->rewriteLogFile = true;
+        return $this;
     }
 
 
@@ -256,7 +250,6 @@ class ILog
 
         $file = '';
         $message = (!empty($msg)) ? $msg : '';
-        $logContext = '';
 
         if ($this->useBacktrace) {
             $execLogMethodFileData = $this->backtrace();
@@ -274,8 +267,14 @@ class ILog
             }
         }
 
-        if (!empty($context)) {
-            $logContext = (is_array($context) || is_object($context)) ? print_r($context, 1) : $context;
+        if (is_array($context) || is_object($context)) {
+            $logContext = print_r($context, 1);
+        } else if (is_bool($context)) {
+            $logContext = ($context) ? 'true' : 'false';
+        } else if (is_null($context)) {
+            $logContext = 'null';
+        } else {
+            $logContext = $context;
         }
 
         $logData = [
@@ -327,7 +326,7 @@ class ILog
      * @param bool $msg сообщение
      * @param bool $context доп. информация
      */
-    public function write(string $level, bool $msg = false, bool $context = false)
+    public function write($level, $msg = false, $context = false)
     {
         if ($this->settings->WRITE_JSON()) {
             $logString = $this->prepareRecordJsonFormat($level, $msg, $context);
@@ -389,7 +388,8 @@ class ILog
                 $strLogData = iconv('windows-1251', 'utf-8', $strLogData);
             }
 
-            $openFile = fopen($pathFile, 'a');
+
+            $openFile = fopen($pathFile, ($this->rewriteLogFile && $this->execLogCount === 0) ? 'w' : 'a');
             fwrite($openFile, $strLogData);
             fclose($openFile);
         }
@@ -499,12 +499,13 @@ class ILog
         $logLevelCode = array_search($name, $this->logLevel);
 
         if ($logLevelCode !== false) {
-
             $this->write(
                 $logLevelCode,
                 $arguments[0],
                 $arguments[1]
             );
+            $this->execLogCount++;
+
             return true;
         }
 
