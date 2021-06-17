@@ -5,9 +5,7 @@ use Bitrix\Main\Application;
 use Bitrix\Main\Loader;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\ModuleManager;
-use Intensa\Logger\Settings;
 
-//Loc::loadMessages(__FILE__);
 
 if (class_exists('intensa_logger')) {
     return;
@@ -25,8 +23,6 @@ class intensa_logger extends CModule
     public $MODULE_GROUP_RIGHTS;
     public $PARTNER_NAME;
     public $PARTNER_URI;
-
-    public $moduleSettings = null;
     protected $errors = [];
 
     public function __construct()
@@ -35,7 +31,7 @@ class intensa_logger extends CModule
         $this->MODULE_VERSION = '0.1.0';
         $this->MODULE_VERSION_DATE = '2021-03-21 10:10:10';
         $this->MODULE_NAME = 'IntensaLogger';
-        $this->MODULE_DESCRIPTION = 'Модуль для логирования данных в проекте';
+        $this->MODULE_DESCRIPTION = GetMessage('MODULE_DESCRIPTION');
         $this->MODULE_GROUP_RIGHTS = 'N';
         $this->PARTNER_NAME = 'Intensa';
         $this->PARTNER_URI = 'https://intensa.ru';
