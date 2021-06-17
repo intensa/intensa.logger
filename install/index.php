@@ -15,6 +15,8 @@ if (class_exists('intensa_logger')) {
 
 class intensa_logger extends CModule
 {
+    const DEFAULT_EVENT_TYPE = 'INTENSA_LOGGER_ALERT';
+    const DEFAULT_EVENT_MESSAGE = 'INTENSA_LOGGER_FATAL_TEMPLATE';
     public $MODULE_ID;
     public $MODULE_VERSION;
     public $MODULE_VERSION_DATE;
@@ -36,30 +38,17 @@ class intensa_logger extends CModule
         $this->MODULE_DESCRIPTION = 'Модуль для логирования данных в проекте';
         $this->MODULE_GROUP_RIGHTS = 'N';
         $this->PARTNER_NAME = 'Intensa';
-        $this->PARTNER_URI = 'http://intensa.ru';
+        $this->PARTNER_URI = 'https://intensa.ru';
     }
 
     public function doInstall()
     {
         global $APPLICATION;
+        $createDir = $this->createDirectory();
+        $this->checkPermission($createDir);
+        $this->createAccessFile($createDir);
+        $this->createSendEvent();
 
-        $settingsInclude = $this->includeSettings();
-
-        if ($settingsInclude) {
-            $createDir = $this->createDirectory();
-            $this->checkPermission($createDir);
-            $this->createSendEvent();
-        } else {
-            $errorMgs = 'Не удалось получить файл конфигурации модуля. Пожалуйста, убедитесь, что файл logger.config.php присутствует в папке модуля.';
-
-            if (file_exists(__DIR__ . '/../logger.config.example.php')) {
-                $errorMgs .= '<br>Найден файл примера конфига. Нужно изменить название данного файла (<b>' . realpath(__DIR__ . '/../logger.config.example.php') . '</b>) на <b>logger.config.php</b> и изменить нужные настройки';
-            } else {
-                $errorMgs .= '<br>Пожалуйста, обратитесь в поддержку <a href="mailto:i.shishkin@intensa.ru">i.shishkin@intensa.ru</a>';
-            }
-
-            $this->errors[] = $errorMgs;
-        }
 
         if (!empty($this->errors)) {
             $APPLICATION->ThrowException(implode('<br>', $this->errors));
@@ -71,55 +60,35 @@ class intensa_logger extends CModule
 
     public function doUninstall()
     {
-        //$this->uninstallDB();
+        $this->removeSendEvent();
         ModuleManager::unregisterModule($this->MODULE_ID);
     }
 
     public function createDirectory()
     {
-        $result = false;
-        $defDirName = $this->moduleSettings['LOG_DIR'];
+        $dirPath = $_SERVER['DOCUMENT_ROOT'] . '/logs/';
 
-        if (empty($defDirName)) {
-            $this->errors[] = 'Не установлена основная директория. Проверьте настройки файла logger.config.php';
-        } else {
-            $dirPath = $_SERVER['DOCUMENT_ROOT'] . $defDirName;
+        if (!file_exists($dirPath)) {
+            $mkdir = mkdir($dirPath, 0777);
 
-            if (!file_exists($dirPath)) {
-                $mkdir = mkdir($dirPath, 0777);
-
-                if (!$mkdir) {
-                    $this->errors[] = 'Ошибка создания основной директории для логов ' . $dirPath;
-                }
+            if (!$mkdir) {
+                $this->errors[] = 'Ошибка создания основной директории для логов ' . $dirPath;
+                return false;
             }
-
-            chmod($dirPath, 0777);
-            $result = $dirPath;
-            $this->checkPermission($dirPath);
         }
 
-        return $result;
-    }
+        chmod($dirPath, 0777);
 
-    public function includeSettings()
-    {
-        $return = false;
-        $settingsFilePath = __DIR__ . '/../logger.config.php';
-        $settingsFile = include_once(realpath($settingsFilePath));
-
-        if ($settingsFile && is_array($settingsFile)) {
-            $this->moduleSettings = $settingsFile;
-            $return = true;
-        } else {
-            $this->errors[] = 'Проблема с получанием настроек из файла logger.config.php';
-        }
-
-        return $return;
+        return $dirPath;
     }
 
     public function createAccessFile($createPath)
     {
-        // create access file
+        $result = file_put_contents($createPath . '.htaccess', 'Deny from all');
+
+        if (!$result) {
+            $this->errors[] = 'Ошибка при создании .htaccess файла';
+        }
     }
 
     public function checkPermission($file)
@@ -131,22 +100,35 @@ class intensa_logger extends CModule
         }
     }
 
-    public function createSendEvent()
+    public function createSendEvent() : bool
     {
         global $APPLICATION;
 
+        $defaultEventType = self::DEFAULT_EVENT_TYPE;
+        $defaultEventName = self::DEFAULT_EVENT_MESSAGE;
+
         $result = false;
+
+        $arActiveSitesIDs = [];
+        $rsSite = \CSite::GetList($by = "sort", $order = "desc", ['ACTIVE' => 'Y']);
+
+        while ($site = $rsSite->Fetch()) {
+            $arActiveSitesIDs[] = $site['ID'];
+        }
+
         $objCEventType = new \CEventType;
 
-        $filterCEventType = ['TYPE_ID' => $this->moduleSettings['CEVENT_TYPE']];
+        $filterCEventType = ['TYPE_ID' => $defaultEventType];
         $objResultCEventType = $objCEventType->GetList($filterCEventType);
+
+
 
         if ($eventType = $objResultCEventType->Fetch()) {
             $createType = $eventType['ID'];
         } else {
             $createType = $objCEventType->Add([
-                'LID' => 'ru',
-                'EVENT_NAME' => $this->moduleSettings['CEVENT_TYPE'],
+                'LID' => $arActiveSitesIDs,
+                'EVENT_NAME' => $defaultEventType,
                 'NAME' => 'intensa.logger',
             ]);
         }
@@ -154,27 +136,21 @@ class intensa_logger extends CModule
         if ($createType) {
             $objCEventMessage = new \CEventMessage;
             $objResultCEventMessage = $objCEventMessage->GetList($by = 'id', $order = 'desc',
-                ['TYPE_ID' => $this->moduleSettings['CEVENT_TYPE']]);
+                ['TYPE_ID' => $defaultEventType]);
 
             if ($eventMessage = $objResultCEventMessage->Fetch()) {
                 $createMessage = true;
             } else {
-                $arActiveSitesIDs = [];
-                $rsSite = \CSite::GetList($by = "sort", $order = "desc", ['ACTIVE' => 'Y']);
-
-                while ($site = $rsSite->Fetch()) {
-                    $arActiveSitesIDs[] = $site['ID'];
-                }
 
                 $createMessage = $objCEventMessage->Add([
                     'ACTIVE' => 'Y',
-                    'EVENT_NAME' => $this->moduleSettings['CEVENT_TYPE'],
+                    'EVENT_NAME' => $defaultEventType,
                     'LID' => $arActiveSitesIDs,
                     'EMAIL_FROM' => '#DEFAULT_EMAIL_FROM#',
                     'EMAIL_TO' => '#EMAIL_TO#',
                     'BCC' => '#BCC#',
-                    'SUBJECT' => '#SUBJECT#',
-                    'MESSAGE' => '#MESSAGE#',
+                    'SUBJECT' => GetMessage('CEVENT_SUBJECT'),
+                    'MESSAGE' => GetMessage('CEVENT_MESSAGE'),
                 ]);
             }
 
@@ -195,6 +171,19 @@ class intensa_logger extends CModule
 
     public function removeSendEvent()
     {
-        // удаление почтового события и шаблона
+        $eventType = self::DEFAULT_EVENT_TYPE;
+
+        if (!empty($eventType)) {
+            $objCEventMessage = new \CEventMessage;
+            $objResultCEventMessage = $objCEventMessage->GetList($by = 'id', $order = 'desc',
+                ['TYPE_ID' => $eventType]);
+
+            while ($eventMessage = $objResultCEventMessage->Fetch()) {
+                $objCEventMessage->Delete($eventMessage['ID']);
+            }
+
+            $objCEventType = new CEventType;
+            $objCEventType->Delete($eventType);
+        }
     }
 }

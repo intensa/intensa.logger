@@ -1,0 +1,19 @@
+{
+  "name": "intensa/intensa.logger",
+  "description": "Module CMS Bitrix for logging developer data in file",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Ivan Shishkin",
+      "email": "i.shishkin@intensa.ru"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Intensa\\Logger\\": "lib/"
+    }
+  },
+  "require": {
+  }
+}

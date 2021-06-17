@@ -173,7 +173,7 @@ class ILog
      */
     protected function getLogDirPath(): string
     {
-        return $_SERVER['DOCUMENT_ROOT'] . $this->settings->LOG_DIR();
+        return $this->settings->LOG_DIR();
     }
 
     /**
@@ -287,10 +287,8 @@ class ILog
             $logContext
         ];
 
-        $logString = str_replace(['{date}', '{level}', '{pid}', '{file}', '{message}', '{context}'], $logData,
+        return str_replace(['{date}', '{level}', '{pid}', '{file}', '{message}', '{context}'], $logData,
                 $this->logTemplate) . PHP_EOL;
-
-        return $logString;
     }
 
     public function prepareRecordJsonFormat($level, $msg = false, $context = false)
@@ -338,14 +336,20 @@ class ILog
         }
 
         $this->instantWriteFile($logString);
-    }
 
-    /**
-     * @return mixed
-     */
-    public function getLogDataItems(): array
-    {
-        return $this->logData['ITEMS'];
+        if ($level === 'fatal') {
+            $objILogAlert = new ILogAlert($this);
+
+            if (!empty($this->additionalAlertEmails)) {
+                $objILogAlert->setAdditionalEmail($this->additionalAlertEmails);
+            }
+
+            if ($this->settings->WRITE_JSON()) {
+                $logString = $this->prepareRecordHumanFormat($level, $msg, $context);
+            }
+
+            $objILogAlert->send($logString);
+        }
     }
 
     /**
@@ -375,7 +379,6 @@ class ILog
         try {
             $pathFile = $this->getLogDir($this->additionalDir) . $this->getLogFileName();
             $this->writePathFile = $pathFile;
-
         } catch (\Exception $e) {
             //если есть проблема с инициализацией папки, не пишем. Письма отправим.
             $canWrite = false;
@@ -389,16 +392,6 @@ class ILog
             $openFile = fopen($pathFile, 'a');
             fwrite($openFile, $strLogData);
             fclose($openFile);
-        }
-
-        if ($this->sendAlert) {
-            $objILogAlert = new ILogAlert($this);
-
-            if (!empty($this->additionalAlertEmails)) {
-                $objILogAlert->setAdditionalEmail($this->additionalAlertEmails);
-            }
-
-            $objILogAlert->send();
         }
     }
 
@@ -417,14 +410,6 @@ class ILog
         }
 
         return $this;
-    }
-
-    /**
-     * Указываем флаг о том, что нужно отправлять оповещения на почту
-     */
-    public function sendAlert()
-    {
-        $this->sendAlert = true;
     }
 
     /**
@@ -514,12 +499,6 @@ class ILog
         $logLevelCode = array_search($name, $this->logLevel);
 
         if ($logLevelCode !== false) {
-            $additionalFolder = false;
-
-            if ($name === 'fatal') {
-                $additionalFolder = 'error';
-                $this->sendAlert();
-            }
 
             $this->write(
                 $logLevelCode,

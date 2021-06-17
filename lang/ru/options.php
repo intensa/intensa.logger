@@ -1,6 +1,10 @@
 <?php
 $MESS['SAVE'] = 'Сохранить';
 $MESS['LOG_DIR'] = 'Путь к папке логов';
+$MESS['SECURITY_LOG_DIR_TRUE'] = '<i style="color: #06972a">(недоступна из браузера)</i>';
+$MESS['SECURITY_LOG_DIR_FALSE'] = '<i style="color: #c21037">(доступна из браузера)</i>';
+$MESS['AVAIL_LOG_DIR_TRUE'] = '<i style="color: #06972a">(существует и доступна для записи)</i>';
+$MESS['AVAIL_LOG_DIR_FALSE'] = '<i style="color: #c21037">(не существует или нет прав на записи)</i>';
 $MESS['LOG_FILE_EXTENSION'] = 'Расширение файла с логами';
 $MESS['DATE_FORMAT'] = 'Формат дата время';
 $MESS['USE_BACKTRACE'] = 'Флаг определяющий нужно ли добавлять в запись лога информация о месте вызова метода';

@@ -5,7 +5,7 @@ defined('ADMIN_MODULE_NAME') or define('ADMIN_MODULE_NAME', 'intensa.logger');
 global $USER;
 global $APPLICATION;
 
-Cmodule::IncludeModule('intensa.logger');
+CModule::IncludeModule('intensa.logger');
 
 if (!$USER->isAdmin()) {
     $APPLICATION->authForm('Nope');
@@ -62,65 +62,126 @@ $tabControl = new CAdminTabControl('tabControl', [
         'TITLE' => getMessage('MAIN_TAB_TITLE_SET'),
     ]
 ]);
+
+$logDirOptionValue = COption::GetOptionString(
+    ADMIN_MODULE_NAME,
+    'LOG_DIR',
+    \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('LOG_DIR')
+);
+
+$logDirLabel = getMessage('LOG_DIR');
+
+if (strpos($_SERVER['SERVER_SOFTWARE'], 'Apache') !== false) {
+
+    if (\Intensa\Logger\Settings::getInstance()->checkDirSecurity($logDirOptionValue)) {
+        $logDirLabel .= '<br>' . getMessage('SECURITY_LOG_DIR_TRUE');
+    } else {
+        $logDirLabel .= '<br>' . getMessage('SECURITY_LOG_DIR_FALSE');
+    }
+}
+
+if (\Intensa\Logger\Settings::getInstance()->checkDirAvailability($logDirOptionValue)) {
+    $logDirLabel .= '<br>' . getMessage('AVAIL_LOG_DIR_TRUE');
+} else {
+    $logDirLabel .= '<br>' . getMessage('AVAIL_LOG_DIR_FALSE');
+}
+var_dump();
+
 $arAllOptions = [
     [
         'LOG_DIR',
-        getMessage('LOG_DIR'),
-        COption::GetOptionString(ADMIN_MODULE_NAME, 'LOG_DIR', '/logs/'),
+        $logDirLabel,
+        $logDirOptionValue,
         ['text']
     ],
     [
         'LOG_FILE_EXTENSION',
         getMessage('LOG_FILE_EXTENSION'),
-        COption::GetOptionString(ADMIN_MODULE_NAME, 'LOG_FILE_EXTENSION', '.log'),
+        COption::GetOptionString(
+            ADMIN_MODULE_NAME,
+            'LOG_FILE_EXTENSION',
+            \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('LOG_FILE_EXTENSION')
+        ),
         ['text']
     ],
     [
         'DATE_FORMAT',
         getMessage('DATE_FORMAT'),
-        COption::GetOptionString(ADMIN_MODULE_NAME, 'DATE_FORMAT', 'Y-m-d H:i:s'),
+        COption::GetOptionString(
+            ADMIN_MODULE_NAME,
+            'DATE_FORMAT',
+            \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('DATE_FORMAT')
+        ),
         ['text']
     ],
     [
         'USE_BACKTRACE',
         getMessage('USE_BACKTRACE'),
-        COption::GetOptionString(ADMIN_MODULE_NAME, 'USE_BACKTRACE', 'Y'),
+        COption::GetOptionString(
+                ADMIN_MODULE_NAME,
+                'USE_BACKTRACE',
+                \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('USE_BACKTRACE')
+        ),
         ['checkbox']
     ],
     [
         'DEV_MODE',
         getMessage('DEV_MODE'),
-        COption::GetOptionString(ADMIN_MODULE_NAME, 'DEV_MODE', 'Y'),
+        COption::GetOptionString(
+            ADMIN_MODULE_NAME,
+            'DEV_MODE',
+            \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('DEV_MODE')
+        ),
         ['checkbox']
     ],
     [
         'CEVENT_TYPE',
         getMessage('CEVENT_TYPE'),
-        COption::GetOptionString(ADMIN_MODULE_NAME, 'CEVENT_TYPE', 'INTENSA_LOGGER_ALERT'),
+        COption::GetOptionString(
+            ADMIN_MODULE_NAME,
+            'CEVENT_TYPE',
+            \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('CEVENT_TYPE')
+        ),
         ['text']
     ],
     [
         'CEVENT_MESSAGE',
-        getMessage('CEVENT_TYPE'),
-        COption::GetOptionString(ADMIN_MODULE_NAME, 'CEVENT_MESSAGE', 'INTENSA_LOGGER_FATAL_TEMPLATE'),
+        getMessage('CEVENT_MESSAGE'),
+        COption::GetOptionString(
+            ADMIN_MODULE_NAME,
+            'CEVENT_MESSAGE',
+            \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('CEVENT_MESSAGE')
+        ),
         ['text']
     ],
     [
         'USE_CP1251',
         getMessage('USE_CP1251'),
-        COption::GetOptionString(ADMIN_MODULE_NAME, 'USE_CP1251', 'N'),
+        COption::GetOptionString(
+            ADMIN_MODULE_NAME,
+            'USE_CP1251',
+            \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('USE_CP1251')
+        ),
         ['checkbox']
     ],
     [
         'ALERT_EMAIL',
         getMessage('ALERT_EMAIL'),
-        COption::GetOptionString(ADMIN_MODULE_NAME, 'ALERT_EMAIL', COption::GetOptionString("main", "email_from")),
+        COption::GetOptionString(
+            ADMIN_MODULE_NAME,
+            'ALERT_EMAIL',
+            \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('ALERT_EMAIL')
+        ),
         ['text']
     ],
     [
         'WRITE_JSON',
         getMessage('WRITE_JSON'),
-        COption::GetOptionString(ADMIN_MODULE_NAME, 'WRITE_JSON', 'N'),
+        COption::GetOptionString(
+            ADMIN_MODULE_NAME,
+            'WRITE_JSON',
+            \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('WRITE_JSON')
+        ),
         ['checkbox']
     ],
 ];
