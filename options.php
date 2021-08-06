@@ -1,6 +1,6 @@
 <?php
 defined('B_PROLOG_INCLUDED') and (B_PROLOG_INCLUDED === true) or die();
-defined('ADMIN_MODULE_NAME') or define('ADMIN_MODULE_NAME', 'intensa.logger');
+defined('LOGGER_MODULE_NAME') or define('LOGGER_MODULE_NAME', 'intensa.logger');
 
 global $USER;
 global $APPLICATION;
@@ -16,7 +16,7 @@ function ShowParamsHTMLByarray($arParams)
         if (is_array($Option)) {
             $Option[0] = 'LOGGER_' . $Option[0];
         }
-        __AdmSettingsDrawRow(ADMIN_MODULE_NAME, $Option);
+        __AdmSettingsDrawRow(LOGGER_MODULE_NAME, $Option);
     }
 }
 $mayEmptyProps = [
@@ -40,13 +40,13 @@ if (isset($_REQUEST['save']) && check_bitrix_sessid()) {
                 }
             }
 
-            COption::SetOptionString(ADMIN_MODULE_NAME, str_replace('LOGGER_', '', $key), $option);
+            COption::SetOptionString(LOGGER_MODULE_NAME, str_replace('LOGGER_', '', $key), $option);
         }
     }
 
     foreach ($mayEmptyProps as $mayEmptyProp) {
         if (!isset($_POST[$mayEmptyProp])) {
-            COption::SetOptionString(ADMIN_MODULE_NAME, str_replace('LOGGER_', '', $mayEmptyProp), '');
+            COption::SetOptionString(LOGGER_MODULE_NAME, str_replace('LOGGER_', '', $mayEmptyProp), '');
         }
     }
 }
@@ -64,7 +64,7 @@ $tabControl = new CAdminTabControl('tabControl', [
 ]);
 
 $logDirOptionValue = COption::GetOptionString(
-    ADMIN_MODULE_NAME,
+    LOGGER_MODULE_NAME,
     'LOG_DIR',
     \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('LOG_DIR')
 );
@@ -98,7 +98,7 @@ $arAllOptions = [
         'LOG_FILE_EXTENSION',
         getMessage('LOG_FILE_EXTENSION'),
         COption::GetOptionString(
-            ADMIN_MODULE_NAME,
+            LOGGER_MODULE_NAME,
             'LOG_FILE_EXTENSION',
             \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('LOG_FILE_EXTENSION')
         ),
@@ -108,7 +108,7 @@ $arAllOptions = [
         'LOG_FILE_PERMISSION',
         getMessage('LOG_FILE_PERMISSION'),
         COption::GetOptionString(
-            ADMIN_MODULE_NAME,
+            LOGGER_MODULE_NAME,
             'LOG_FILE_PERMISSION',
             \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('LOG_FILE_PERMISSION')
         ),
@@ -126,7 +126,7 @@ $arAllOptions = [
         'DATE_FORMAT',
         getMessage('DATE_FORMAT'),
         COption::GetOptionString(
-            ADMIN_MODULE_NAME,
+            LOGGER_MODULE_NAME,
             'DATE_FORMAT',
             \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('DATE_FORMAT')
         ),
@@ -136,7 +136,7 @@ $arAllOptions = [
         'USE_BACKTRACE',
         getMessage('USE_BACKTRACE'),
         COption::GetOptionString(
-                ADMIN_MODULE_NAME,
+                LOGGER_MODULE_NAME,
                 'USE_BACKTRACE',
                 \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('USE_BACKTRACE')
         ),
@@ -146,7 +146,7 @@ $arAllOptions = [
         'DEV_MODE',
         getMessage('DEV_MODE'),
         COption::GetOptionString(
-            ADMIN_MODULE_NAME,
+            LOGGER_MODULE_NAME,
             'DEV_MODE',
             \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('DEV_MODE')
         ),
@@ -156,7 +156,7 @@ $arAllOptions = [
         'CEVENT_TYPE',
         getMessage('CEVENT_TYPE'),
         COption::GetOptionString(
-            ADMIN_MODULE_NAME,
+            LOGGER_MODULE_NAME,
             'CEVENT_TYPE',
             \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('CEVENT_TYPE')
         ),
@@ -166,7 +166,7 @@ $arAllOptions = [
         'CEVENT_MESSAGE',
         getMessage('CEVENT_MESSAGE'),
         COption::GetOptionString(
-            ADMIN_MODULE_NAME,
+            LOGGER_MODULE_NAME,
             'CEVENT_MESSAGE',
             \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('CEVENT_MESSAGE')
         ),
@@ -176,7 +176,7 @@ $arAllOptions = [
         'USE_CP1251',
         getMessage('USE_CP1251'),
         COption::GetOptionString(
-            ADMIN_MODULE_NAME,
+            LOGGER_MODULE_NAME,
             'USE_CP1251',
             \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('USE_CP1251')
         ),
@@ -186,7 +186,7 @@ $arAllOptions = [
         'ALERT_EMAIL',
         getMessage('ALERT_EMAIL'),
         COption::GetOptionString(
-            ADMIN_MODULE_NAME,
+            LOGGER_MODULE_NAME,
             'ALERT_EMAIL',
             \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('ALERT_EMAIL')
         ),
@@ -196,7 +196,7 @@ $arAllOptions = [
         'WRITE_JSON',
         getMessage('WRITE_JSON'),
         COption::GetOptionString(
-            ADMIN_MODULE_NAME,
+            LOGGER_MODULE_NAME,
             'WRITE_JSON',
             \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('WRITE_JSON')
         ),
