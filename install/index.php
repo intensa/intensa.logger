@@ -30,7 +30,7 @@ class intensa_logger extends CModule
         $this->MODULE_ID = 'intensa.logger';
         $this->MODULE_VERSION = '0.1.0';
         $this->MODULE_VERSION_DATE = '2021-03-21 10:10:10';
-        $this->MODULE_NAME = 'IntensaLogger';
+        $this->MODULE_NAME = 'Intensa Logger';
         $this->MODULE_DESCRIPTION = GetMessage('MODULE_DESCRIPTION');
         $this->MODULE_GROUP_RIGHTS = 'N';
         $this->PARTNER_NAME = 'Intensa';
@@ -178,7 +178,7 @@ class intensa_logger extends CModule
                 $objCEventMessage->Delete($eventMessage['ID']);
             }
 
-            $objCEventType = new CEventType;
+            $objCEventType = new \CEventType;
             $objCEventType->Delete($eventType);
         }
     }
