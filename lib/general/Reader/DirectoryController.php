@@ -1,10 +1,12 @@
 <?php
 
 
-namespace Intensa\Logger;
+namespace Intensa\Logger\Reader;
 
 
-class ILogReader
+use Intensa\Logger\Settings;
+
+class DirectoryController
 {
     protected $logDirPath = false;
     protected $dirData = [
@@ -21,7 +23,7 @@ class ILogReader
 
     public function getRootLogDir()
     {
-        return $_SERVER['DOCUMENT_ROOT'] . $this->logDirPath;
+        return $this->logDirPath;
     }
 
     public function getDirectoriesByDay()
@@ -35,8 +37,12 @@ class ILogReader
         return $this;
     }
 
-    public function getDirectoryItems($path)
+    public function getDirectoryItems($path = false)
     {
+        if (empty($path)) {
+            $path = $this->logDirPath;
+        }
+
         $return = [
             'directories' => [],
             'files' => [],

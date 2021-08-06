@@ -383,6 +383,8 @@ class ILog
             $canWrite = false;
         }
 
+        var_dump($canWrite);
+
         if ($canWrite) {
             if ($this->convertCP1251) {
                 $strLogData = iconv('windows-1251', 'utf-8', $strLogData);

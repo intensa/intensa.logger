@@ -1,8 +1,8 @@
 <?php
 // @todo тут нужно сделать корректное определение урла
-$pathAdmin = '/local/modules/intensa.logger/admin/index.php';
+$pathAdmin = '/bitrix/admin/intensa_logger.php';
 $menu = array(
-    "parent_menu" => "global_menu_services",
+    "parent_menu" => "global_menu_settings",
     "url" => $pathAdmin,
     "sort" => 1,
     "text" => 'Intensa Logger',

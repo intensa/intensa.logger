@@ -1,0 +1,32 @@
+$colorBg: #ffffff;
+$colorText: #171717;
+$errorColor: #F3B4B4;
+$widthTablet: 1150;
+$widthPhone: 767;
+$widthXs: 500;
+$font: Montserrat, sans-serif;
+
+
+@mixin mediaWidth($media-width) {
+    @media screen and (max-width: #{$media-width}px) {
+        @content;
+    }
+}
+
+@mixin mediaHeight($media-height) {
+    @media screen and (max-height: #{$media-height}px) {
+        @content;
+    }
+}
+
+@mixin mediaIE() {
+    @media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+        @content;
+    }
+}
+
+@mixin media-min($media-width) {
+    @media screen and (min-width: #{$media-width}px) {
+        @content;
+    }
+}
