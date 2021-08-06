@@ -89,14 +89,20 @@ class ILog
      */
 
     protected $additionalAlertEmails = [];
+    /**
+     * @var bool
+     */
     protected $rewriteLogFile = false;
+    /**
+     * @var int
+     */
     protected $execLogCount = 0;
 
     /**
      * ILog constructor.
-     * @param false $code
+     * @param string $code
      */
-    public function __construct($code = false)
+    public function __construct(string $code = '')
     {
         $this->settings = Settings::getInstance();
         $this->dateFormat = $this->settings->DATE_FORMAT();
@@ -121,7 +127,7 @@ class ILog
      * @return bool|string
      * @throws
      */
-    public function initLogDir()
+    public function initLogDir() : string
     {
         if ($this->initLogDir === false) {
             $path = $this->getLogDirPath();
@@ -147,9 +153,9 @@ class ILog
     }
 
     /**
-     * @return bool|mixed|string
+     * @return string
      */
-    public function getLoggerCode()
+    public function getLoggerCode(): string
     {
         return $this->loggerCode;
     }
@@ -173,11 +179,9 @@ class ILog
     {
         if ($this->settings->WRITE_JSON()) {
             $name = $this->loggerCode . '.json.log';
-        }
-        elseif ($this->settings->LOG_FILE_EXTENSION()) {
+        } elseif ($this->settings->LOG_FILE_EXTENSION()) {
             $name = $this->loggerCode . $this->settings->LOG_FILE_EXTENSION();
-        }
-        else {
+        } else {
             $name = $this->loggerCode . '.txt';
         }
 
@@ -191,24 +195,23 @@ class ILog
      */
     public function getLogLevel(int $code = 1): string
     {
-        $level = (array_key_exists($code, $this->logLevel)) ? $this->logLevel[$code] : $this->logLevel[1];
-        return $level;
+        return (array_key_exists($code, $this->logLevel)) ? $this->logLevel[$code] : $this->logLevel[1];
     }
 
     /**
      * Возвращает путь к директории, в которую нужно положить файл.
      * Если нужно положиться текущий лог в отдельную папку -
      * передаем название доп. директории через аргумент $additionalDir
-     * @param bool $additionalDir
+     * @param string $additionalDir
      * @return mixed|string
      * @throws \Exception
      */
-    public function getLogDir($additionalDir = false): string
+    public function getLogDir(string $additionalDir = ''): string
     {
 
         $path = $this->initLogDir() . '{space}';
 
-        if (!empty($additionalDir) && $additionalDir !== false) {
+        if (!empty($additionalDir)) {
             $path = str_replace('{space}', '/' . $additionalDir . '/', $path);
 
             if (!file_exists($path)) {
@@ -226,7 +229,7 @@ class ILog
 
     /**
      * Метод позволяет задать дополнительную директорию для логгера
-     * @param $dirName
+     * @param string $dirName
      */
     public function setAdditionalDir(string $dirName)
     {
@@ -235,17 +238,26 @@ class ILog
         }
     }
 
-    public function rewrite()
+    /**
+     * @return $this
+     */
+    public function rewrite(): ILog
     {
         $this->rewriteLogFile = true;
         return $this;
     }
 
 
-    protected function prepareRecordHumanFormat($level, $msg = false, $context = false): string
+    /**
+     * @param $level
+     * @param $msg
+     * @param $context
+     * @return string
+     */
+    protected function prepareRecordHumanFormat($level, $msg, $context): string
     {
         $date = '[' . date($this->dateFormat) . ']';
-        $level = '[:' . $this->getLogLevel($level) . ']';
+        $level = '[:' . $level . ']';
         $pid = '[pid:' . $this->identifier . ']';
 
         $file = '';
@@ -290,11 +302,17 @@ class ILog
                 $this->logTemplate) . PHP_EOL;
     }
 
-    public function prepareRecordJsonFormat($level, $msg = false, $context = false)
+    /**
+     * @param $level
+     * @param $msg
+     * @param $context
+     * @return string
+     */
+    public function prepareRecordJsonFormat($level, $msg, $context) : string
     {
         $logItems = [
             'time' => date($this->dateFormat),
-            'level' => $this->getLogLevel($level),
+            'level' => $level,
             'pid' => $this->identifier,
             'msg' => $msg,
             'context' => $context
@@ -310,7 +328,7 @@ class ILog
             }
         }
 
-        $jsonEncodeRecord = json_encode($logItems);
+        $jsonEncodeRecord = \json_encode($logItems);
 
         if (!empty($jsonEncodeRecord)) {
             $jsonEncodeRecord .= PHP_EOL;
@@ -322,21 +340,23 @@ class ILog
     /**
      * Метод формирует сообщение лога согласно шаблону и добавляет сообщение в свойство $this->logData
      * по средствам метода $this->setLogItemAdditionalDir()
-     * @param string $level уровень лога
-     * @param bool $msg сообщение
-     * @param bool $context доп. информация
+     * @param int $level уровень лога
+     * @param string $msg сообщение
+     * @param $context доп. информация
      */
-    public function write($level, $msg = false, $context = false)
+    public function write(int $level, string $msg = '', $context = false)
     {
+        $levelSting = $this->getLogLevel($level);
+
         if ($this->settings->WRITE_JSON()) {
-            $logString = $this->prepareRecordJsonFormat($level, $msg, $context);
+            $logString = $this->prepareRecordJsonFormat($levelSting, $msg, $context);
         } else {
-            $logString = $this->prepareRecordHumanFormat($level, $msg, $context);
+            $logString = $this->prepareRecordHumanFormat($levelSting, $msg, $context);
         }
 
         $this->instantWriteFile($logString);
 
-        if ($level === 'fatal') {
+        if ($levelSting === 'fatal') {
             $objILogAlert = new ILogAlert($this);
 
             if (!empty($this->additionalAlertEmails)) {
@@ -344,7 +364,7 @@ class ILog
             }
 
             if ($this->settings->WRITE_JSON()) {
-                $logString = $this->prepareRecordHumanFormat($level, $msg, $context);
+                $logString = $this->prepareRecordHumanFormat($levelSting, $msg, $context);
             }
 
             $objILogAlert->send($logString);
@@ -369,9 +389,9 @@ class ILog
 
     /**
      * Записывает в файл
-     * @param $strLogData
+     * @param string $strLogData
      */
-    protected function instantWriteFile($strLogData)
+    protected function instantWriteFile(string $strLogData)
     {
         $canWrite = true;
 
@@ -388,7 +408,6 @@ class ILog
                 $strLogData = iconv('windows-1251', 'utf-8', $strLogData);
             }
 
-
             $openFile = fopen($pathFile, ($this->rewriteLogFile && $this->execLogCount === 0) ? 'w' : 'a');
             fwrite($openFile, $strLogData);
             fclose($openFile);
@@ -398,7 +417,7 @@ class ILog
 
     /**
      * Через этот метод можно установить дополнительный email для получения алертов
-     * @param $email
+     * @param string $email
      * @return $this
      */
     public function setAlertEmail(string $email): ILog
@@ -447,9 +466,9 @@ class ILog
 
 
     /**
-     * @param $timerCode
+     * @param string $timerCode
      */
-    public function startTimer($timerCode)
+    public function startTimer(string $timerCode)
     {
         $objLoggerTimer = new ILogTimer($timerCode);
 
@@ -459,15 +478,14 @@ class ILog
         }
 
         $this->timers[$timerCode] = $objLoggerTimer;
-
     }
 
     /**
-     * @param bool $timerCode
+     * @param string $timerCode
      * @param bool $autoStop
-     * @return mixed
+     * @return void
      */
-    public function stopTimer($timerCode = false, $autoStop = false)
+    public function stopTimer(string $timerCode = '', bool $autoStop = false)
     {
         if (array_key_exists($timerCode, $this->timers)) {
             $currentTimer = $this->timers[$timerCode];
@@ -525,5 +543,4 @@ class ILog
             }
         }
     }
-
 }
