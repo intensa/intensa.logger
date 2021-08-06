@@ -98,6 +98,8 @@ class ILog
      */
     protected $execLogCount = 0;
 
+    protected $filePermission = 0;
+
     /**
      * ILog constructor.
      * @param string $code
@@ -108,6 +110,9 @@ class ILog
         $this->dateFormat = $this->settings->DATE_FORMAT();
         $this->loggerCode = (!empty($code)) ? str_replace(['/', '\\'], '_', $code) : 'common';
         $this->identifier = getmypid();
+
+        $settingsFilePermission = $this->settings->LOG_FILE_PERMISSION();
+        $this->filePermission = $this->prepareFilePermissionMask($settingsFilePermission);
 
         if ($this->settings->USE_BACKTRACE() === 'Y') {
             $this->useBacktrace = true;
@@ -137,10 +142,10 @@ class ILog
             if (file_exists($currentDayLogDir)) {
                 $this->initLogDir = $currentDayLogDir;
             } else {
-                $createDir = mkdir($currentDayLogDir, 0777, true);
+                $createDir = mkdir($currentDayLogDir, $this->filePermission, true);
 
                 if ($createDir) {
-                    chmod($currentDayLogDir, 0777);
+                    chmod($currentDayLogDir, $this->filePermission);
                     chown($currentDayLogDir, 'www-data');
                     $this->initLogDir = $currentDayLogDir;
                 } else {
@@ -188,6 +193,20 @@ class ILog
         return $name;
     }
 
+    // @todo тут остановился нужно напистаь метод, который 8 представление числа вернет, а не строку
+    //https://www.php.net/manual/ru/function.chmod.php
+    protected function prepareFilePermissionMask($permission)
+    {
+        $dictionary = [
+            '0644' => 0644,
+            '0755' => 0755,
+            '0775' => 0775,
+            '0777' => 0777,
+        ];
+
+        return (array_key_exists($permission, $dictionary)) ? $dictionary[$permission] : 0777;
+    }
+
     /**
      * Возвращает текстовый код уровня лога
      * @param int $code
@@ -215,9 +234,9 @@ class ILog
             $path = str_replace('{space}', '/' . $additionalDir . '/', $path);
 
             if (!file_exists($path)) {
-                $mkdir = mkdir($path, 0777, true);
+                $mkdir = mkdir($path, $this->filePermission, true);
                 if ($mkdir) {
-                    chmod($path, 0777);
+                    chmod($path, $this->filePermission);
                 }
             }
         } else {

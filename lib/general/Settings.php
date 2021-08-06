@@ -14,6 +14,7 @@ namespace Intensa\Logger;
  * @method string USE_CP1251()
  * @method string ALERT_EMAIL()
  * @method string WRITE_JSON()
+ * @method string LOG_FILE_PERMISSION()
  * @package Intensa\Logger
  */
 class Settings
@@ -23,6 +24,7 @@ class Settings
     private $optionsList = [
         'LOG_DIR' => '/logs/',
         'LOG_FILE_EXTENSION' => '.log',
+        'LOG_FILE_PERMISSION' => '0775',
         'DATE_FORMAT' => 'Y-m-d H:i:s',
         'USE_BACKTRACE' => 'Y',
         'DEV_MODE' => 'Y',

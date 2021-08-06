@@ -105,6 +105,24 @@ $arAllOptions = [
         ['text']
     ],
     [
+        'LOG_FILE_PERMISSION',
+        getMessage('LOG_FILE_PERMISSION'),
+        COption::GetOptionString(
+            ADMIN_MODULE_NAME,
+            'LOG_FILE_PERMISSION',
+            \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('LOG_FILE_PERMISSION')
+        ),
+        [
+            'selectbox',
+            [
+                '0644' => '0644',
+                '0755' => '0755',
+                '0775' => '0775',
+                '0777' => '0777',
+            ]
+        ]
+    ],
+    [
         'DATE_FORMAT',
         getMessage('DATE_FORMAT'),
         COption::GetOptionString(
