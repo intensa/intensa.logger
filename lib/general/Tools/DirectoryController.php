@@ -27,13 +27,13 @@ class DirectoryController
     }
 
 
-    public function flagShowAllFiles()
+    public function flagShowAllFiles(): DirectoryController
     {
         $this->showAllFiles = true;
         return $this;
     }
 
-    public function getDirectoryItems($path = false)
+    public function getDirectoryItems($path = false): array
     {
         if (empty($path)) {
             $path = $this->logDirPath;
@@ -77,7 +77,7 @@ class DirectoryController
         return $return;
     }
 
-    protected function filterFileExtension($fileName)
+    protected function filterFileExtension($fileName): bool
     {
         return (strpos($fileName, '.json.log') !== false);
     }
