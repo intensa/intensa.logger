@@ -15,6 +15,7 @@ namespace Intensa\Logger;
  * @method string ALERT_EMAIL()
  * @method string WRITE_JSON()
  * @method string LOG_FILE_PERMISSION()
+ * @method string CLEAR_LOGS_TIME()
  * @package Intensa\Logger
  */
 class Settings

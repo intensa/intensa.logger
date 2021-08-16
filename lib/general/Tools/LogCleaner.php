@@ -10,9 +10,12 @@ class LogCleaner
 
     public function __construct()
     {
-        $settingTimeValue = '-1 week';
-        $this->clearTime = $this->prepareSettingsClearTime($settingTimeValue);
-        $this->rootLogDirectories = Settings::getInstance()->LOG_DIR();
+        $settingTimeValue = Settings::getInstance()->CLEAR_LOGS_TIME();
+
+        if ($settingTimeValue !== 'never') {
+            $this->clearTime = $this->prepareSettingsClearTime($settingTimeValue);
+            $this->rootLogDirectories = Settings::getInstance()->LOG_DIR();
+        }
     }
 
     public function installAgent()
@@ -20,6 +23,11 @@ class LogCleaner
         // @todo тут метод установки агнета.
         // я думаю стоит сделать проверку, если агент не зареган регаем его , если зареган активируем
         // в настройках стоит сделать фичу, которая будет активировать или диактивировать агнет в зависимости от сохраняемого значения
+    }
+
+    public function getClearTime()
+    {
+        return $this->clearTime;
     }
 
     protected function prepareSettingsClearTime($time)
@@ -61,14 +69,19 @@ class LogCleaner
     public static function clear(): string
     {
         $selfObj = new self();
-        $oldDirectories = $selfObj->getOldLogsDirectories();
 
-        if (!empty($oldDirectories) && is_array($oldDirectories)) {
-            foreach ($oldDirectories as $item) {
-                $res = unlink($item);
+        if ($selfObj->getClearTime() > 0) {
+            $oldDirectories = $selfObj->getOldLogsDirectories();
+
+            if (!empty($oldDirectories) && is_array($oldDirectories)) {
+                foreach ($oldDirectories as $item) {
+                    // @todo: это не работает нормально, нужно отлаживать
+                    $res = unlink($item);
+                }
             }
+
+            return __METHOD__ . '();';
         }
 
-        return __METHOD__ . '();';
     }
 }
