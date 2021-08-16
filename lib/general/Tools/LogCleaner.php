@@ -15,6 +15,13 @@ class LogCleaner
         $this->rootLogDirectories = Settings::getInstance()->LOG_DIR();
     }
 
+    public function installAgent()
+    {
+        // @todo тут метод установки агнета.
+        // я думаю стоит сделать проверку, если агент не зареган регаем его , если зареган активируем
+        // в настройках стоит сделать фичу, которая будет активировать или диактивировать агнет в зависимости от сохраняемого значения
+    }
+
     protected function prepareSettingsClearTime($time)
     {
         return strtotime($time);
