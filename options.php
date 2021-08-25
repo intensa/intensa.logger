@@ -202,6 +202,27 @@ $arAllOptions = [
         ),
         ['checkbox']
     ],
+    [
+        'CLEAR_LOGS_TIME',
+        getMessage('CLEAR_LOGS_TIME'),
+        COption::GetOptionString(
+            LOGGER_MODULE_NAME,
+            'CLEAR_LOGS_TIME',
+            \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('CLEAR_LOGS_TIME')
+        ),
+        [
+            'selectbox',
+            [
+                'never' => 'Никогда',
+                '-1 week' => 'Старше 1 недели',
+                '-2 week' => 'Старше 2x недель',
+                '-1 month' => 'Старше 1 месяца',
+                '-2 month' => 'Старше 2х месяцев',
+                '-3 month' => 'Старше 3x месяцев',
+                '-6 month' => 'Старше полугода'
+            ]
+        ]
+    ],
 ];
 ?>
 

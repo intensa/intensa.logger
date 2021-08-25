@@ -44,6 +44,7 @@ class intensa_logger extends CModule
         $this->checkPermission($createDir);
         $this->createAccessFile($createDir);
         $this->createSendEvent();
+        $this->installAgents();
 
 
         if (!empty($this->errors)) {
@@ -57,8 +58,22 @@ class intensa_logger extends CModule
     public function doUninstall()
     {
         $this->removeSendEvent();
+        $this->unInstallAgents();
         ModuleManager::unregisterModule($this->MODULE_ID);
     }
+
+    public function installAgents(): bool
+    {
+        \Intensa\Logger\Tools\LogCleaner::installAgent();
+        return true;
+    }
+
+    public function unInstallAgents(): bool
+    {
+        \Intensa\Logger\Tools\LogCleaner::deleteAgent();
+        return true;
+    }
+
 
     public function createDirectory()
     {

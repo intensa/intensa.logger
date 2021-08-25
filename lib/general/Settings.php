@@ -15,6 +15,7 @@ namespace Intensa\Logger;
  * @method string ALERT_EMAIL()
  * @method string WRITE_JSON()
  * @method string LOG_FILE_PERMISSION()
+ * @method string CLEAR_LOGS_TIME()
  * @package Intensa\Logger
  */
 class Settings
@@ -32,7 +33,8 @@ class Settings
         'CEVENT_MESSAGE' => 'INTENSA_LOGGER_FATAL_TEMPLATE',
         'USE_CP1251' => 'N',
         'ALERT_EMAIL' => '',
-        'WRITE_JSON' => 'Y'
+        'WRITE_JSON' => 'Y',
+        'CLEAR_LOGS_TIME' => 'never'
     ];
 
     private function __construct()
@@ -104,6 +106,11 @@ class Settings
         }
 
         return $result;
+    }
+
+    public function getModuleId()
+    {
+        return 'intensa.logger';
     }
 
     public function __call($name, $arg = [])
