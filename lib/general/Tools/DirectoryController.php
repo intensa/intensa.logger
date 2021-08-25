@@ -69,7 +69,9 @@ class DirectoryController
                     'path' => $item->getPathname(),
                     'size' => $item->getSize(),
                     'mtime' => $item->getMTime(),
-                    'mtime_format' => date(Settings::getInstance()->DATE_FORMAT(), $item->getMTime())
+                    'mtime_format' => date(Settings::getInstance()->DATE_FORMAT(), $item->getMTime()),
+                    'ctime' => $item->getCTime(),
+                    'ctime_format' => date(Settings::getInstance()->DATE_FORMAT(), $item->getCTime()),
                 ];
             }
         }

@@ -108,6 +108,11 @@ class Settings
         return $result;
     }
 
+    public function getModuleId()
+    {
+        return 'intensa.logger';
+    }
+
     public function __call($name, $arg = [])
     {
         return (array_key_exists($name, $this->settings)) ? $this->settings[$name] : null;

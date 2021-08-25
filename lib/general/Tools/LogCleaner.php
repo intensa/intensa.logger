@@ -18,11 +18,25 @@ class LogCleaner
         }
     }
 
-    public function installAgent()
+    public static function installAgent()
     {
-        // @todo тут метод установки агнета.
-        // я думаю стоит сделать проверку, если агент не зареган регаем его , если зареган активируем
-        // в настройках стоит сделать фичу, которая будет активировать или диактивировать агнет в зависимости от сохраняемого значения
+        $now = new DateTime();
+
+        \CAgent::AddAgent(
+            self::clear(),
+            Settings::getInstance()->getModuleId(),
+            'N',
+            86400,
+            $now,
+            'Y',
+            $now,
+            30
+        );
+    }
+
+    public static function deleteAgent()
+    {
+        \CAgent::RemoveAgent(self::clear(), Settings::getInstance()->getModuleId());
     }
 
     public function getClearTime()
@@ -43,13 +57,28 @@ class LogCleaner
         $rootDirectoryItems = $objDirectoryController->getDirectoryItems();
 
         foreach ($rootDirectoryItems['directories'] as $dateKey => $item) {
-            // todo сюда я бы предложил добавить проверку верности названия папки при помощи preg+match
             if (
-                isset($item['mtime'])
+                $this->isAllowDirectory($item['path'])
+                && $this->isLoggerDirectory($item['path'])
                 && $this->isOldDirectory($item['mtime'])
-                && $this->isAllowDirectory($item['path'])
             ) {
                 $return[$dateKey] = $item['path'];
+            }
+        }
+
+        return $return;
+    }
+
+    public function isLoggerDirectory($path): string
+    {
+        $arPath = explode('/', $path);
+        $return = false;
+
+        if (!empty($arPath) && is_array($arPath)) {
+            $lastPathItem = end($arPath);
+
+            if (preg_match("/\d{4}-\d{2}-\d{2}/m", $lastPathItem)) {
+                $return = true;
             }
         }
 
@@ -66,22 +95,37 @@ class LogCleaner
         return (time() - $timeModify > time() - $this->clearTime);
     }
 
-    public static function clear(): string
+    public static function clear($run = false): string
     {
-        $selfObj = new self();
+        if ($run) {
+            $selfObj = new self();
 
-        if ($selfObj->getClearTime() > 0) {
-            $oldDirectories = $selfObj->getOldLogsDirectories();
+            if ($selfObj->getClearTime() > 0) {
+                $oldDirectories = $selfObj->getOldLogsDirectories();
 
-            if (!empty($oldDirectories) && is_array($oldDirectories)) {
-                foreach ($oldDirectories as $item) {
-                    // @todo: это не работает нормально, нужно отлаживать
-                    $res = unlink($item);
+                if (!empty($oldDirectories) && is_array($oldDirectories)) {
+                    foreach ($oldDirectories as $item) {
+                        $selfObj->deleteDirectory($item);
+                    }
                 }
             }
-
-            return __METHOD__ . '();';
         }
 
+        return __METHOD__ . '(true);';
+    }
+
+    protected function deleteDirectory($dirPath) : void
+    {
+        $dirIterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dirPath, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ($dirIterator as $path) {
+            $pathName = $path->getPathname();
+            ($path->isDir() && ($path->isLink() === false)) ? rmdir($pathName) : unlink($pathName);
+        }
+
+        rmdir($dirPath);
     }
 }
