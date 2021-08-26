@@ -518,6 +518,11 @@ class ILog
         }
     }
 
+    public function startSqlTracker()
+    {
+
+    }
+
     /**
      * @param string $name
      * @param array $arguments
