@@ -100,6 +100,8 @@ class ILog
 
     protected $filePermission = 0;
 
+    protected $sqlTracker = null;
+
     /**
      * ILog constructor.
      * @param string $code
@@ -473,7 +475,7 @@ class ILog
     public function backtrace(): array
     {
         $return = [];
-        $backtraceData = debug_backtrace(false, 3);
+        $backtraceData = debug_backtrace(false, 4);
         $execMethodRecord = array_pop($backtraceData);
 
         if (!empty($execMethodRecord) && is_array($execMethodRecord)) {
@@ -514,13 +516,30 @@ class ILog
                 $timerData['STOP_POINT'] = '__destruct';
             }
 
-            $this->write(6, 'Lead time:', $timerData);
+            $this->write(2, "Timer {$timerData['CODE']}", $timerData);
         }
     }
 
-    public function startSqlTracker()
+    public function startSqlTracker($code = 'common')
     {
+        if (is_null($this->sqlTracker)) {
+            $this->sqlTracker = new ILogSql();
+        }
 
+        $this->sqlTracker->start($code);
+    }
+
+    public function stopSqlTracker($code = 'common')
+    {
+        if ($this->sqlTracker instanceof ILogSql) {
+            $trackerResult = $this->sqlTracker->stop($code);
+            $this->logSqlTracker($code, $trackerResult);
+        }
+    }
+
+    protected function logSqlTracker($code, $data)
+    {
+        $this->write(2, "SqlTracker {$code}:", $data);
     }
 
     /**
@@ -564,6 +583,14 @@ class ILog
                 if ($objTimer instanceof ILogTimer && !$objTimer->isDie()) {
                     $this->stopTimer($timerCode, true);
                 }
+            }
+        }
+
+        if (!is_null($this->sqlTracker) && $this->sqlTracker instanceof ILogSql) {
+            $autoStopTrackersData = $this->sqlTracker->stopAll();
+
+            foreach ($autoStopTrackersData as $trackerCode => $trackerItem) {
+                $this->logSqlTracker($trackerCode, $trackerItem);
             }
         }
     }

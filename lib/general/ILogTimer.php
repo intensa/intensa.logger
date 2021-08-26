@@ -61,24 +61,5 @@ class ILogTimer
         return $data;
     }
 
-    public function getTimeStart()
-    {
-        return $this->timeStart;
-    }
-
-    public function getTimeEnd(): int
-    {
-        return $this->timeEnd;
-    }
-
-    public function getExecTime(): int
-    {
-        return $this->execTime;
-    }
-
-    public function getTimerCode(): string
-    {
-        return $this->timerCode;
-    }
 
 }
