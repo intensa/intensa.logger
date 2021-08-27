@@ -4,31 +4,31 @@ namespace Intensa\Logger;
 
 /**
  * Class ILog
- * @method void debug(string $message, array|object $context)
- * @method void log(string $message, array|object $context)
- * @method void info(string $message, array|object $context)
- * @method void warning(string $message, array|object $context)
- * @method void error(string $message, array|object $context)
- * @method void fatal(string $message, array|object $context)
+ * @method void debug(string $message, mixed $context)
+ * @method void log(string $message, mixed $context)
+ * @method void info(string $message, mixed $context)
+ * @method void warning(string $message, mixed $context)
+ * @method void error(string $message, mixed $context)
+ * @method void fatal(string $message, mixed $context)
  * @package Intensa\Logger
  */
 class ILog
 {
-    /**
-     * @var string
-     */
-    protected $logTemplate = "{date}{level}{pid}{file} {message} {context}";
 
     /**
-     * @var array
+     * Шаблон элементов для лог файла
      */
-    protected $logLevel = [
+    const LOG_TEMPLATE = '{date}{level}{pid}{file} {message} {context}';
+    
+    /**
+     * Уровни логирования
+     */
+    const LOG_LEVELS = [
         1 => 'debug',
         2 => 'info',
         3 => 'warning',
         4 => 'error',
         5 => 'fatal',
-        6 => 'timer',
     ];
 
     /**
@@ -45,6 +45,7 @@ class ILog
      * @var string
      */
     protected $loggerCode = '';
+
     /**
      * @var Settings|null
      */
@@ -64,6 +65,7 @@ class ILog
      * @var bool
      */
     protected $writePathFile = false;
+
     /**
      * @var bool
      */
@@ -80,24 +82,29 @@ class ILog
     protected $convertCP1251 = false;
 
     /**
+     * Массив таймеров выполнения
      * @var array
      */
     protected $timers = [];
-    /**
-     * ILog constructor.
-     * @param bool $code
-     */
 
+    /**
+     * @var array
+     */
     protected $additionalAlertEmails = [];
+
     /**
      * @var bool
      */
     protected $rewriteLogFile = false;
+
     /**
      * @var int
      */
     protected $execLogCount = 0;
 
+    /**
+     * @var int
+     */
     protected $filePermission = 0;
 
     /**
@@ -124,17 +131,18 @@ class ILog
             $this->useBacktrace = true;
         }
 
-        if (defined('SITE_CHARSET')) {
-            if (SITE_CHARSET === 'windows-1251') {
-                $this->convertCP1251 = true;
-            }
+        if (
+            $this->settings->USE_CP1251() === 'Y'
+            || (defined('SITE_CHARSET') && SITE_CHARSET === 'windows-1251')
+        ) {
+            $this->convertCP1251 = true;
         }
     }
 
     /**
      * Инициализация директории для логов вида logs/{current_date}/.
      * Если директории текущего дня еще не существует, то создает.
-     * Созданной папке устанавливаются права 0777.
+     * Созданной папке устанавливаются права заданные в настройках модуля.
      * @return bool|string
      * @throws
      */
@@ -164,6 +172,7 @@ class ILog
     }
 
     /**
+     * Метод возвращает код логгера
      * @return string
      */
     public function getLoggerCode(): string
@@ -193,15 +202,19 @@ class ILog
         } elseif ($this->settings->LOG_FILE_EXTENSION()) {
             $name = $this->loggerCode . $this->settings->LOG_FILE_EXTENSION();
         } else {
-            $name = $this->loggerCode . '.txt';
+            $name = $this->loggerCode . '.log';
         }
 
         return $name;
     }
 
-    // @todo тут остановился нужно напистаь метод, который 8 представление числа вернет, а не строку
-    //https://www.php.net/manual/ru/function.chmod.php
-    protected function prepareFilePermissionMask($permission)
+    /**
+     * Метод получает 8-ое представления уровня доступа по переданной строке
+     * @crunch метод является костылем, требует рефакторинга
+     * @param $permission
+     * @return int
+     */
+    protected function prepareFilePermissionMask($permission): int
     {
         $dictionary = [
             '0644' => 0644,
@@ -220,7 +233,7 @@ class ILog
      */
     public function getLogLevel(int $code = 1): string
     {
-        return (array_key_exists($code, $this->logLevel)) ? $this->logLevel[$code] : $this->logLevel[1];
+        return (array_key_exists($code, self::LOG_LEVELS)) ? self::LOG_LEVELS[$code] : self::LOG_LEVELS[1];
     }
 
     /**
@@ -241,6 +254,7 @@ class ILog
 
             if (!file_exists($path)) {
                 $mkdir = mkdir($path, $this->filePermission, true);
+
                 if ($mkdir) {
                     chmod($path, $this->filePermission);
                 }
@@ -264,6 +278,7 @@ class ILog
     }
 
     /**
+     * Метод заставляет логгер перезаписывать файл при каждом новом вызове логирующего метода
      * @return $this
      */
     public function rewrite(): ILog
@@ -306,9 +321,9 @@ class ILog
 
         if (is_array($context) || is_object($context)) {
             $logContext = print_r($context, 1);
-        } else if (is_bool($context)) {
+        } elseif (is_bool($context)) {
             $logContext = ($context) ? 'true' : 'false';
-        } else if (is_null($context)) {
+        } elseif (is_null($context)) {
             $logContext = 'null';
         } else {
             $logContext = $context;
@@ -324,7 +339,7 @@ class ILog
         ];
 
         return str_replace(['{date}', '{level}', '{pid}', '{file}', '{message}', '{context}'], $logData,
-                $this->logTemplate) . PHP_EOL;
+                self::LOG_TEMPLATE) . PHP_EOL;
     }
 
     /**
@@ -424,7 +439,7 @@ class ILog
             $pathFile = $this->getLogDir($this->additionalDir) . $this->getLogFileName();
             $this->writePathFile = $pathFile;
         } catch (\Exception $e) {
-            //если есть проблема с инициализацией папки, не пишем. Письма отправим.
+            // Если есть проблема с инициализацией папки, не пишем. Письма отправим.
             $canWrite = false;
         }
 
@@ -457,7 +472,7 @@ class ILog
     }
 
     /**
-     *
+     * Метод позволяет включить отладку
      */
     public function useBacktrace()
     {
@@ -465,7 +480,7 @@ class ILog
     }
 
     /**
-     *
+     * Метод позволяет отключить отладку
      */
     public function notUseBacktrace()
     {
@@ -491,6 +506,7 @@ class ILog
 
 
     /**
+     * Метод создает таймер выполнения с заданым кодом
      * @param string $timerCode
      */
     public function startTimer(string $timerCode)
@@ -506,6 +522,7 @@ class ILog
     }
 
     /**
+     * Метод останавливает таймер выполнения с заданым кодом
      * @param string $timerCode
      * @param bool $autoStop
      * @return void
@@ -575,7 +592,7 @@ class ILog
             return false;
         }
 
-        $logLevelCode = array_search($name, $this->logLevel);
+        $logLevelCode = array_search($name, self::LOG_LEVELS);
 
         if ($logLevelCode !== false) {
             $this->write(
@@ -592,7 +609,7 @@ class ILog
     }
 
     /**
-     *
+     * В деструкторе останавливает все незавершенные таймеры и sql трекеры
      */
     function __destruct()
     {
