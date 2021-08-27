@@ -1,3 +1,3 @@
 <?php
-$MESS['MODULE_NAME'] = 'IntensaLogger';
-$MESS['MODULE_DESCRIPTION'] = 'Модуль для логирования данных в проекте';
+$MESS['LOGGER_MODULE_NAME'] = 'IntensaLogger';
+$MESS['LOGGER_MODULE_DESCRIPTION'] = 'Модуль для логирования данных в проекте';

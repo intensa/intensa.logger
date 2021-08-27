@@ -35,8 +35,8 @@ class intensa_logger extends CModule
         $this->MODULE_ID = 'intensa.logger';
         $this->MODULE_VERSION = $arModuleVersion['VERSION'];
         $this->MODULE_VERSION_DATE = $arModuleVersion['VERSION_DATE'];
-        $this->MODULE_NAME = GetMessage('MODULE_NAME');
-        $this->MODULE_DESCRIPTION = GetMessage('MODULE_DESCRIPTION');
+        $this->MODULE_NAME = GetMessage('LOGGER_MODULE_NAME');
+        $this->MODULE_DESCRIPTION = GetMessage('LOGGER_MODULE_DESCRIPTION');
         $this->MODULE_GROUP_RIGHTS = 'N';
         $this->PARTNER_NAME = 'Intensa';
         $this->PARTNER_URI = 'https://intensa.ru';

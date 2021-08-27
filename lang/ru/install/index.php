@@ -1,6 +1,6 @@
 <?php
-$MESS['MODULE_NAME'] = 'IntensaLogger';
-$MESS['MODULE_DESCRIPTION'] = 'Модуль для логирования данных в проекте';
+$MESS['LOGGER_MODULE_NAME'] = 'IntensaLogger';
+$MESS['LOGGER_MODULE_DESCRIPTION'] = 'Модуль для логирования данных в проекте';
 $MESS['CEVENT_MESSAGE'] = 'Файл вызова: <b>#LOGGER_EXEC_PATH#</b><br>
 Код лога: <b>#LOGGER_CODE#</b><br>
 Путь к файлу лога: <b>#LOGGER_PATH#</b><br>
