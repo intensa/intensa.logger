@@ -4,6 +4,10 @@
 namespace Intensa\Logger;
 
 
+/**
+ * Class ILogSql
+ * @package Intensa\Logger
+ */
 class ILogSql
 {
     protected $connection = null;
@@ -15,6 +19,10 @@ class ILogSql
         $this->connection = \Bitrix\Main\Application::getConnection();
     }
 
+    /**
+     * Запускает отслеживание запросов для переданного кода.
+     * @param $code
+     */
     public function start($code)
     {
         if (!empty($this->trackerPull)) {
@@ -34,6 +42,11 @@ class ILogSql
         $this->setTracker($code, $tracker);
     }
 
+    /**
+     * Добавляет трекер в пулл трекеров
+     * @param $code
+     * @param $tracker
+     */
     protected function setTracker($code, $tracker)
     {
         $this->trackerPull[$code] = [
@@ -44,21 +57,34 @@ class ILogSql
         ];
     }
 
+    /**
+     * Получение запросов трекера
+     * @param $tracker
+     * @param $code
+     * @return array
+     */
     protected function getTrackerQuery($tracker, $code): array
     {
         $result = [];
 
         foreach ($tracker->getQueries() as $query) {
-            $result[] = [
+            $resultData = [
                 'query' => $query->getSql(),
                 'time' => $query->getTime(),
                 'code' => $code
             ];
+
+            $result[md5(serialize($resultData))] = $resultData;
         }
 
         return $result;
     }
 
+    /**
+     * Получение трекера по коду
+     * @param $code
+     * @return mixed
+     */
     public function getTracker($code)
     {
         if (array_key_exists($code, $this->trackerPull)) {
@@ -66,11 +92,10 @@ class ILogSql
         }
     }
 
-    public function getTrackersData()
-    {
-        return $this->trackersData;
-    }
-
+    /**
+     * Устанавливает флаг завершенности трекера
+     * @param $code
+     */
     protected function finishTracker($code)
     {
         if (array_key_exists($code, $this->trackerPull)) {
@@ -78,6 +103,11 @@ class ILogSql
         }
     }
 
+    /**
+     * Устанавливает данные запросов для конкретного трекера
+     * @param $code
+     * @param $data
+     */
     protected function setTrackerData($code, $data)
     {
         if (array_key_exists($code, $this->trackerPull)) {
@@ -85,7 +115,11 @@ class ILogSql
         }
     }
 
-    protected function getNotFinishTrackersCodes()
+    /**
+     * Возвращает массив кодов всех не завершенных трекеров
+     * @return array
+     */
+    protected function getNotFinishTrackersCodes(): array
     {
         $return = [];
 
@@ -98,8 +132,16 @@ class ILogSql
         return $return;
     }
 
+    /**
+     * Останавливает трекер с переданым в качестве аргумента кодом.
+     * Возвращает массив запросов и время их выполнения
+     * @param $code
+     * @return array
+     */
     public function stop($code): array
     {
+        $return = [];
+
         if (array_key_exists($code, $this->trackerPull)) {
             $trackerItem = $this->trackerPull[$code];
             $this->connection->stopTracker();
@@ -119,11 +161,19 @@ class ILogSql
                 }
             }
 
-            return $this->getPrepareResultDataForSelectTracker($code, $this->trackersData);
+            $return = $this->getPrepareResultDataForSelectTracker($code, $this->trackersData);
         }
+
+        return $return;
     }
 
-    protected function getPrepareResultDataForSelectTracker($trackerCode, $data)
+    /**
+     * Возвращает данные для конкретного трекера.
+     * @param $trackerCode
+     * @param $data
+     * @return array
+     */
+    protected function getPrepareResultDataForSelectTracker($trackerCode, $data): array
     {
         $result = [];
 
@@ -137,6 +187,10 @@ class ILogSql
         return $result;
     }
 
+    /**
+     * Останавливает все активные трекеры
+     * @return array
+     */
     public function stopAll(): array
     {
         $return = [];
