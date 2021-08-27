@@ -53,6 +53,7 @@ if (isset($_REQUEST['save']) && check_bitrix_sessid()) {
 
 IncludeModuleLangFile($_SERVER[ 'DOCUMENT_ROOT' ] . '/bitrix/modules/main/options.php');
 IncludeModuleLangFile(__FILE__);
+
 include("install/version.php");
 
 $tabControl = new CAdminTabControl('tabControl', [
@@ -85,7 +86,6 @@ if (\Intensa\Logger\Settings::getInstance()->checkDirAvailability($logDirOptionV
 } else {
     $logDirLabel .= '<br>' . getMessage('AVAIL_LOG_DIR_FALSE');
 }
-var_dump();
 
 $arAllOptions = [
     [
@@ -213,13 +213,13 @@ $arAllOptions = [
         [
             'selectbox',
             [
-                'never' => 'Никогда',
-                '-1 week' => 'Старше 1 недели',
-                '-2 week' => 'Старше 2x недель',
-                '-1 month' => 'Старше 1 месяца',
-                '-2 month' => 'Старше 2х месяцев',
-                '-3 month' => 'Старше 3x месяцев',
-                '-6 month' => 'Старше полугода'
+                'never' => getMessage('never'),
+                '-1 week' => getMessage('-1 week'),
+                '-2 week' => getMessage('-2 week'),
+                '-1 month' => getMessage('-1 month'),
+                '-2 month' => getMessage('-2 month'),
+                '-3 month' => getMessage('-3 month'),
+                '-6 month' => getMessage('-6 month')
             ]
         ]
     ],

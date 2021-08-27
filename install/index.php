@@ -27,10 +27,15 @@ class intensa_logger extends CModule
 
     public function __construct()
     {
+        $arModuleVersion = [];
+        $path = str_replace("\\", "/", __FILE__);
+        $path = substr($path, 0, strlen($path) - strlen("/index.php"));
+        include($path . "/version.php");
+
         $this->MODULE_ID = 'intensa.logger';
-        $this->MODULE_VERSION = '0.1.0';
-        $this->MODULE_VERSION_DATE = '2021-03-21 10:10:10';
-        $this->MODULE_NAME = 'Intensa Logger';
+        $this->MODULE_VERSION = $arModuleVersion['VERSION'];
+        $this->MODULE_VERSION_DATE = $arModuleVersion['VERSION_DATE'];
+        $this->MODULE_NAME = GetMessage('MODULE_NAME');
         $this->MODULE_DESCRIPTION = GetMessage('MODULE_DESCRIPTION');
         $this->MODULE_GROUP_RIGHTS = 'N';
         $this->PARTNER_NAME = 'Intensa';
