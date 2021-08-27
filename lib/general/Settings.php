@@ -1,5 +1,6 @@
 <?php
 
+
 namespace Intensa\Logger;
 
 /**

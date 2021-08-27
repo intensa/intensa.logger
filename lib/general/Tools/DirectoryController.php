@@ -3,42 +3,33 @@
 
 namespace Intensa\Logger\Tools;
 
-
 use Intensa\Logger\Settings;
 
 class DirectoryController
 {
     protected $logDirPath = false;
-    protected $dirData = [
-        'dirs' => [],
-        'files' => [],
-    ];
     protected $showAllFiles = false;
 
-
+    /**
+     * @throws \Exception
+     */
     public function __construct()
     {
-        $this->logDirPath = Settings::getInstance()->LOG_DIR();
-    }
-
-    public function getRootLogDir()
-    {
-        return $this->logDirPath;
-    }
-
-
-    public function flagShowAllFiles(): DirectoryController
-    {
-        $this->showAllFiles = true;
-        return $this;
-    }
-
-    public function getDirectoryItems($path = false): array
-    {
-        if (empty($path)) {
-            $path = $this->logDirPath;
+        if (Settings::getInstance()->LOG_DIR()) {
+            $this->logDirPath = Settings::getInstance()->LOG_DIR();
+        } else {
+            throw new \Exception('Фатальная ошибка. Не задан путь к корневой папке логов.');
         }
 
+    }
+
+    public function getRootDirectoryItems(): array
+    {
+        return $this->getDirectoryItems($this->logDirPath);
+    }
+
+    public function getDirectoryItems($path): array
+    {
         $return = [
             'directories' => [],
             'files' => [],
@@ -48,21 +39,7 @@ class DirectoryController
 
         foreach ($dirIterator as $item) {
             if (!$item->isDot()) {
-                $typeItem = false;
-
-                if ($item->isDir()) {
-                    $typeItem = 'directories';
-                }
-                elseif ($item->isFile()) {
-                    $typeItem = 'files';
-                }
-
-                if (
-                    $typeItem === 'files'
-                    && !$this->showAllFiles
-                    && !$this->filterFileExtension($item->getBasename())) {
-                    continue;
-                }
+                $typeItem = ($item->isDir()) ? 'directories' : 'files';
 
                 $return[$typeItem][$item->getBasename()] = [
                     'name' => $item->getBasename(),
@@ -70,13 +47,17 @@ class DirectoryController
                     'size' => $item->getSize(),
                     'mtime' => $item->getMTime(),
                     'mtime_format' => date(Settings::getInstance()->DATE_FORMAT(), $item->getMTime()),
-                    'ctime' => $item->getCTime(),
-                    'ctime_format' => date(Settings::getInstance()->DATE_FORMAT(), $item->getCTime()),
                 ];
             }
         }
 
         return $return;
+    }
+
+    public function flagShowAllFiles(): DirectoryController
+    {
+        $this->showAllFiles = true;
+        return $this;
     }
 
     protected function filterFileExtension($fileName): bool

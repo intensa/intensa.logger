@@ -1,4 +1,6 @@
 <?php
+
+
 namespace Intensa\Logger\Tools;
 
 use Intensa\Logger\Settings;
@@ -53,17 +55,21 @@ class LogCleaner
     {
         $return = [];
 
-        $objDirectoryController = new DirectoryController();
-        $rootDirectoryItems = $objDirectoryController->getDirectoryItems();
+        try {
+            $objDirectoryController = new DirectoryController();
+            $rootDirectoryItems = $objDirectoryController->getRootDirectoryItems();
 
-        foreach ($rootDirectoryItems['directories'] as $dateKey => $item) {
-            if (
-                $this->isAllowDirectory($item['path'])
-                && $this->isLoggerDirectory($item['path'])
-                && $this->isOldDirectory($item['mtime'])
-            ) {
-                $return[$dateKey] = $item['path'];
+            foreach ($rootDirectoryItems['directories'] as $dateKey => $item) {
+                if (
+                    $this->isAllowDirectory($item['path'])
+                    && $this->isLoggerDirectory($item['path'])
+                    && $this->isOldDirectory($item['mtime'])
+                ) {
+                    $return[$dateKey] = $item['path'];
+                }
             }
+        } catch (\Exception $e) {
+
         }
 
         return $return;
