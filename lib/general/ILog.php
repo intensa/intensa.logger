@@ -100,6 +100,10 @@ class ILog
 
     protected $filePermission = 0;
 
+    /**
+     * В свойстве храниться объект класса ILogSql
+     * @var null
+     */
     protected $sqlTracker = null;
 
     /**
@@ -520,7 +524,11 @@ class ILog
         }
     }
 
-    public function startSqlTracker($code = 'common')
+    /**
+     * Метод создает трекер sql запросов
+     * @param string $code
+     */
+    public function startSqlTracker(string $code = 'common')
     {
         if (is_null($this->sqlTracker)) {
             $this->sqlTracker = new ILogSql();
@@ -529,7 +537,11 @@ class ILog
         $this->sqlTracker->start($code);
     }
 
-    public function stopSqlTracker($code = 'common')
+    /**
+     * Метод останавливает трекер sql запросов и записывает результат в лог файл
+     * @param string $code
+     */
+    public function stopSqlTracker(string $code = 'common')
     {
         if ($this->sqlTracker instanceof ILogSql) {
             $trackerResult = $this->sqlTracker->stop($code);
@@ -537,6 +549,12 @@ class ILog
         }
     }
 
+    /**
+     * Отдельный метод для записи результата sql трекера в лог файл
+     * Запись попадает в лог файл с уровнем info
+     * @param $code
+     * @param $data
+     */
     protected function logSqlTracker($code, $data)
     {
         $this->write(2, "SqlTracker {$code}:", $data);
