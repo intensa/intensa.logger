@@ -15,7 +15,7 @@ class LogCleaner
         $settingTimeValue = Settings::getInstance()->CLEAR_LOGS_TIME();
 
         if ($settingTimeValue !== 'never') {
-            $this->clearTime = $this->prepareSettingsClearTime($settingTimeValue);
+            $this->setClearTime($settingTimeValue);
             $this->rootLogDirectories = Settings::getInstance()->LOG_DIR();
         }
     }
@@ -46,10 +46,11 @@ class LogCleaner
         return $this->clearTime;
     }
 
-    protected function prepareSettingsClearTime($time)
+    public function setClearTime($setValue)
     {
-        return strtotime($time);
+        $this->clearTime = strtotime($setValue);
     }
+
 
     public function getOldLogsDirectories(): array
     {
