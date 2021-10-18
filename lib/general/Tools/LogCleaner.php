@@ -8,15 +8,20 @@ use Intensa\Logger\Settings;
 class LogCleaner
 {
     protected $clearTime = 0;
-    protected $rootLogDirectories = '';
+    protected $rootLogDirectory = '';
+    protected $allowExecute = false;
 
     public function __construct()
     {
         $settingTimeValue = Settings::getInstance()->CLEAR_LOGS_TIME();
 
         if ($settingTimeValue !== 'never') {
-            $this->setClearTime($settingTimeValue);
-            $this->rootLogDirectories = Settings::getInstance()->LOG_DIR();
+            if (
+                $this->setClearTime($settingTimeValue)
+                && $this->setRootLogDirectory(Settings::getInstance()->LOG_DIR())
+            ) {
+                $this->allowExecute = true;
+            }
         }
     }
 
@@ -36,6 +41,11 @@ class LogCleaner
         );
     }
 
+    public function allow(): bool
+    {
+        return $this->allowExecute;
+    }
+
     public static function deleteAgent()
     {
         \CAgent::RemoveAgent(self::clear(), Settings::getInstance()->getModuleId());
@@ -46,11 +56,33 @@ class LogCleaner
         return $this->clearTime;
     }
 
-    public function setClearTime($setValue)
+    public function setClearTime($setValue): bool
     {
-        $this->clearTime = strtotime($setValue);
+        $return = false;
+
+        if (!empty($setValue)) {
+            $time = strtotime($setValue);
+
+            if ($time > 0) {
+                $this->clearTime = $time;
+                $return = true;
+            }
+        }
+
+        return $return;
     }
 
+    public function setRootLogDirectory($path): bool
+    {
+        $return = false;
+
+        if (!empty($path)) {
+            $this->rootLogDirectory = $path;
+            $return = true;
+        }
+
+        return $return;
+    }
 
     public function getOldLogsDirectories(): array
     {
@@ -76,7 +108,7 @@ class LogCleaner
         return $return;
     }
 
-    public function isLoggerDirectory($path): string
+    public function isLoggerDirectory($path): bool
     {
         $arPath = explode('/', $path);
         $return = false;
@@ -94,7 +126,7 @@ class LogCleaner
 
     protected function isAllowDirectory($path): bool
     {
-        return strpos($path, $this->rootLogDirectories) !== false;
+        return strpos($path, $this->rootLogDirectory) !== false;
     }
 
     public function isOldDirectory($timeModify): bool
@@ -107,7 +139,7 @@ class LogCleaner
         if ($run) {
             $selfObj = new self();
 
-            if ($selfObj->getClearTime() > 0) {
+            if ($selfObj->allow()) {
                 $oldDirectories = $selfObj->getOldLogsDirectories();
 
                 if (!empty($oldDirectories) && is_array($oldDirectories)) {

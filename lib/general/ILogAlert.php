@@ -16,20 +16,26 @@ class ILogAlert
         $this->objILog = $obj;
     }
 
-    public function setAdditionalEmail($emails)
+    public function setAdditionalEmails($emails)
     {
         if (!empty($emails)) {
             $this->additionalEmail = $emails;
         }
     }
 
+    public function getAdditionalEmail(): array
+    {
+        return $this->additionalEmail;
+    }
+
     protected function getEmails(): string
     {
         $emails = $this->settings->ALERT_EMAIL();
-
         // добавим дополнительные адреса
-        if (!empty($this->additionalEmail) && is_array($this->additionalEmail)) {
-            $strEmails = implode(',', $this->additionalEmail);
+        $additionalEmail = $this->getAdditionalEmail();
+
+        if (!empty($additionalEmail) && is_array($additionalEmail)) {
+            $strEmails = implode(',', $additionalEmail);
             if (!empty($strEmails)) {
                 $emails .= ',' . $strEmails;
             }
