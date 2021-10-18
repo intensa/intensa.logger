@@ -11,7 +11,7 @@
             "Intensa\\Logger\\": "general/"
         }
     },
-    "require": {
+    "require-dev": {
         "phpunit/phpunit": "^9.5"
     }
 }
