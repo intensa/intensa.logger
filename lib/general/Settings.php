@@ -41,7 +41,7 @@ class Settings
     private function __construct()
     {
         foreach ($this->optionsList as $optionCode => $defaultValue) {
-            $value = \COption::GetOptionString('intensa.logger', $optionCode, '');
+            $value = \COption::GetOptionString('intensa.logger', $optionCode, $defaultValue);
             $this->settings[$optionCode] = $value;
         }
     }

@@ -161,6 +161,7 @@ class ILog
 
                 if ($createDir) {
                     chmod($currentDayLogDir, $this->filePermission);
+                    // @todo это посмотреть
                     chown($currentDayLogDir, 'www-data');
                     $this->initLogDir = $currentDayLogDir;
                 } else {
@@ -401,7 +402,7 @@ class ILog
             $objILogAlert = new ILogAlert($this);
 
             if (!empty($this->additionalAlertEmails)) {
-                $objILogAlert->setAdditionalEmail($this->additionalAlertEmails);
+                $objILogAlert->setAdditionalEmails($this->additionalAlertEmails);
             }
 
             if ($this->settings->WRITE_JSON()) {

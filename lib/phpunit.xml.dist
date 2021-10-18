@@ -1,0 +1,9 @@
+<phpunit
+        bootstrap="bootstrap.php"
+        colors="true">
+    <testsuites>
+        <testsuite name="intensa-logger-tests">
+            <directory>./</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
