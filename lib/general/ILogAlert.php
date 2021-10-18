@@ -52,7 +52,7 @@ class ILogAlert
             $arEventFields = [
                 'EMAIL_TO' => $emails,
                 'LOGGER_CODE' => $this->objILog->getLoggerCode(),
-                'LOGGER_PATH' => $this->objILog->getWritePathFile(),
+                'LOGGER_PATH' => $this->objILog->getWriteFilePath(),
                 'LOGGER_MESSAGE' => $message,
             ];
 

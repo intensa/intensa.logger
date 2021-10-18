@@ -83,7 +83,7 @@ class ILog
     /**
      * @var bool
      */
-    protected $writePathFile = false;
+    protected $writeFilePath = false;
 
     /**
      * @var bool
@@ -132,9 +132,12 @@ class ILog
      */
     protected $sqlTracker = null;
 
+    protected $canWrite = true;
+
     /**
      * ILog constructor.
      * @param string $code
+     * @throws \Exception
      */
     public function __construct(string $code = '')
     {
@@ -143,8 +146,13 @@ class ILog
         $this->loggerCode = (!empty($code)) ? str_replace(['/', '\\'], '_', $code) : 'common';
         $this->identifier = getmypid();
 
-        $settingsFilePermission = $this->settings->LOG_FILE_PERMISSION();
-        $this->filePermission = $this->prepareFilePermissionMask($settingsFilePermission);
+        $this->filePermission = $this->prepareFilePermissionMask($this->settings->LOG_FILE_PERMISSION());
+
+        try {
+            $this->initWriteFilePath();
+        } catch (\Exception $e) {
+            $this->canWrite = false;
+        }
 
         if ($this->settings->USE_BACKTRACE() === 'Y') {
             $this->useBacktrace = true;
@@ -246,15 +254,6 @@ class ILog
         return (array_key_exists($permission, $dictionary)) ? $dictionary[$permission] : 0777;
     }
 
-    /**
-     * Возвращает текстовый код уровня лога
-     * @param int $code
-     * @return mixed
-     */
-    public function getLogLevel(int $code = 1): string
-    {
-        return (array_key_exists($code, self::LOG_LEVELS)) ? self::LOG_LEVELS[$code] : self::LOG_LEVELS[1];
-    }
 
     /**
      * Возвращает путь к директории, в которую нужно положить файл.
@@ -431,9 +430,9 @@ class ILog
     /**
      * @return bool
      */
-    public function getWritePathFile(): bool
+    public function getWriteFilePath(): bool
     {
-        return $this->writePathFile;
+        return $this->writeFilePath;
     }
 
     /**
@@ -445,27 +444,25 @@ class ILog
     }
 
     /**
+     * @throws \Exception
+     */
+    protected function initWriteFilePath()
+    {
+        $this->writeFilePath = $this->getLogDir($this->additionalDir) . $this->getLogFileName();
+    }
+
+    /**
      * Записывает в файл
      * @param string $strLogData
      */
     protected function instantWriteFile(string $strLogData)
     {
-        $canWrite = true;
-
-        try {
-            $pathFile = $this->getLogDir($this->additionalDir) . $this->getLogFileName();
-            $this->writePathFile = $pathFile;
-        } catch (\Exception $e) {
-            // Если есть проблема с инициализацией папки, не пишем. Письма отправим.
-            $canWrite = false;
-        }
-
-        if ($canWrite) {
+        if ($this->canWrite) {
             if ($this->convertCP1251) {
                 $strLogData = iconv('windows-1251', 'utf-8', $strLogData);
             }
 
-            $openFile = fopen($pathFile, ($this->rewriteLogFile && $this->execLogCount === 0) ? 'w' : 'a');
+            $openFile = fopen($this->writeFilePath, ($this->rewriteLogFile && $this->execLogCount === 0) ? 'w' : 'a');
             fwrite($openFile, $strLogData);
             fclose($openFile);
         }
