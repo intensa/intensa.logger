@@ -8,9 +8,13 @@ namespace Intensa\Logger;
  * @method void debug(string $message, mixed $context)
  * @method void log(string $message, mixed $context)
  * @method void info(string $message, mixed $context)
+ * @method void notice(string $message, mixed $context)
  * @method void warning(string $message, mixed $context)
  * @method void error(string $message, mixed $context)
+ * @method void critical(string $message, mixed $context)
+ * @method void alert(string $message, mixed $context)
  * @method void fatal(string $message, mixed $context)
+ * @method void emergency(string $message, mixed $context)
  * @package Intensa\Logger
  */
 class ILog
@@ -20,16 +24,30 @@ class ILog
      * Шаблон элементов для лог файла
      */
     const LOG_TEMPLATE = '{date}{level}{pid}{file} {message} {context}';
-    
+
+    const EMERGENCY = 'emergency';
+    const ALERT = 'alert';
+    const CRITICAL = 'critical';
+    const ERROR = 'error';
+    const WARNING = 'warning';
+    const NOTICE = 'notice';
+    const INFO = 'info';
+    const DEBUG = 'debug';
+
     /**
-     * Уровни логирования
+     * Константа связывающая метод класса и уровень лога
      */
-    const LOG_LEVELS = [
-        1 => 'debug',
-        2 => 'info',
-        3 => 'warning',
-        4 => 'error',
-        5 => 'fatal',
+    const METHOD_MATCH_LEVEL = [
+        'emergency' => self::EMERGENCY,
+        'fatal' => self::ALERT,
+        'alert' => self::ALERT,
+        'critical' => self::CRITICAL,
+        'error' => self::ERROR,
+        'warning' => self::WARNING,
+        'notice' => self::NOTICE,
+        'info' => self::INFO,
+        'log' => self::INFO,
+        'debug' => self::DEBUG,
     ];
 
     /**
@@ -248,7 +266,6 @@ class ILog
      */
     public function getLogDir(string $additionalDir = ''): string
     {
-
         $path = $this->initLogDir() . '{space}';
 
         if (!empty($additionalDir)) {
@@ -382,23 +399,21 @@ class ILog
     /**
      * Метод формирует сообщение лога согласно шаблону и добавляет сообщение в свойство $this->logData
      * по средствам метода $this->setLogItemAdditionalDir()
-     * @param int $level уровень лога
+     * @param string $level уровень лога
      * @param string $msg сообщение
      * @param $context доп. информация
      */
-    public function write(int $level, string $msg = '', $context = false)
+    public function write(string $level, string $msg = '', $context = false)
     {
-        $levelSting = $this->getLogLevel($level);
-
         if ($this->settings->WRITE_JSON()) {
-            $logString = $this->prepareRecordJsonFormat($levelSting, $msg, $context);
+            $logString = $this->prepareRecordJsonFormat($level, $msg, $context);
         } else {
-            $logString = $this->prepareRecordHumanFormat($levelSting, $msg, $context);
+            $logString = $this->prepareRecordHumanFormat($level, $msg, $context);
         }
 
         $this->instantWriteFile($logString);
 
-        if ($levelSting === 'fatal') {
+        if (in_array($level, [self::ALERT, self::EMERGENCY, self::CRITICAL])) {
             $objILogAlert = new ILogAlert($this);
 
             if (!empty($this->additionalAlertEmails)) {
@@ -406,7 +421,7 @@ class ILog
             }
 
             if ($this->settings->WRITE_JSON()) {
-                $logString = $this->prepareRecordHumanFormat($levelSting, $msg, $context);
+                $logString = $this->prepareRecordHumanFormat($level, $msg, $context);
             }
 
             $objILogAlert->send($logString);
@@ -539,7 +554,7 @@ class ILog
                 $timerData['STOP_POINT'] = '__destruct';
             }
 
-            $this->write(2, "Timer {$timerData['CODE']}", $timerData);
+            $this->write(self::INFO, "Timer {$timerData['CODE']}", $timerData);
         }
     }
 
@@ -576,7 +591,7 @@ class ILog
      */
     protected function logSqlTracker($code, $data)
     {
-        $this->write(2, "SqlTracker {$code}:", $data);
+        $this->write(self::INFO, "SqlTracker {$code}:", $data);
     }
 
     /**
@@ -586,19 +601,14 @@ class ILog
      */
     public function __call(string $name, array $arguments): bool
     {
-        if ($name === 'log') {
-            $name = 'info';
-        }
-
-        if ($name === 'debug' && $this->settings->DEV_MODE() !== 'Y') {
+        if ($name === self::DEBUG && $this->settings->DEV_MODE() !== 'Y') {
             return false;
         }
 
-        $logLevelCode = array_search($name, self::LOG_LEVELS);
-
-        if ($logLevelCode !== false) {
+        if (array_key_exists($name, self::METHOD_MATCH_LEVEL)) {
+            $logLevel = self::METHOD_MATCH_LEVEL[$name];
             $this->write(
-                $logLevelCode,
+                $logLevel,
                 $arguments[0],
                 $arguments[1]
             );
