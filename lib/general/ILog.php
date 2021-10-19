@@ -192,8 +192,6 @@ class ILog
 
                 if ($createDir) {
                     chmod($currentDayLogDir, $this->filePermission);
-                    // @todo это посмотреть
-                    chown($currentDayLogDir, 'www-data');
                     $this->initLogDir = $currentDayLogDir;
                 } else {
                     throw new \Exception('Failed to create date folder. Check root path logs dif');
