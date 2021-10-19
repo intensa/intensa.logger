@@ -133,6 +133,7 @@ class ILog
     protected $sqlTracker = null;
 
     protected $canWrite = true;
+    protected $writeJson = false;
 
     /**
      * ILog constructor.
@@ -156,6 +157,10 @@ class ILog
 
         if ($this->settings->USE_BACKTRACE() === 'Y') {
             $this->useBacktrace = true;
+        }
+
+        if ($this->settings->WRITE_JSON() === 'Y') {
+            $this->writeJson = true;
         }
 
         if (
@@ -225,7 +230,7 @@ class ILog
      */
     protected function getLogFileName(): string
     {
-        if ($this->settings->WRITE_JSON()) {
+        if ($this->writeJson) {
             $name = $this->loggerCode . '.json.log';
         } elseif ($this->settings->LOG_FILE_EXTENSION()) {
             $name = $this->loggerCode . $this->settings->LOG_FILE_EXTENSION();
@@ -404,7 +409,7 @@ class ILog
      */
     public function write(string $level, string $msg = '', $context = false)
     {
-        if ($this->settings->WRITE_JSON()) {
+        if ($this->writeJson) {
             $logString = $this->prepareRecordJsonFormat($level, $msg, $context);
         } else {
             $logString = $this->prepareRecordHumanFormat($level, $msg, $context);
@@ -412,6 +417,7 @@ class ILog
 
         $this->instantWriteFile($logString);
 
+        // отправка оповещения
         if (in_array($level, [self::ALERT, self::EMERGENCY, self::CRITICAL])) {
             $objILogAlert = new ILogAlert($this);
 
@@ -419,7 +425,7 @@ class ILog
                 $objILogAlert->setAdditionalEmails($this->additionalAlertEmails);
             }
 
-            if ($this->settings->WRITE_JSON()) {
+            if ($this->writeJson) {
                 $logString = $this->prepareRecordHumanFormat($level, $msg, $context);
             }
 
