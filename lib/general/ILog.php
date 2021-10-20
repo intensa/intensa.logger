@@ -134,6 +134,7 @@ class ILog
 
     protected $canWrite = true;
     protected $writeJson = false;
+    protected $writer = null;
 
     /**
      * ILog constructor.
@@ -150,7 +151,9 @@ class ILog
         $this->filePermission = $this->prepareFilePermissionMask($this->settings->LOG_FILE_PERMISSION());
 
         try {
-            $this->initWriteFilePath();
+            $filePath = $this->initWriteFilePath();
+            $this->writer = new Writer($filePath);
+
         } catch (\Exception $e) {
             $this->canWrite = false;
         }
@@ -453,6 +456,7 @@ class ILog
     protected function initWriteFilePath()
     {
         $this->writeFilePath = $this->getLogDir($this->additionalDir) . $this->getLogFileName();
+        return $this->writeFilePath;
     }
 
     /**
@@ -466,9 +470,10 @@ class ILog
                 $strLogData = iconv('windows-1251', 'utf-8', $strLogData);
             }
 
-            $openFile = fopen($this->writeFilePath, ($this->rewriteLogFile && $this->execLogCount === 0) ? 'w' : 'a');
+            $this->writer->write($strLogData);
+            /*$openFile = fopen($this->writeFilePath, ($this->rewriteLogFile && $this->execLogCount === 0) ? 'w' : 'a');
             fwrite($openFile, $strLogData);
-            fclose($openFile);
+            fclose($openFile);*/
         }
     }
 
