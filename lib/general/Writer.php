@@ -75,7 +75,6 @@ class Writer
     protected function flush()
     {
         if (memory_get_usage(true) > $this->getMemoryLimit()) {
-            var_dump('flush');
             $this->writeToStream();
             $this->storage = [];
         }
