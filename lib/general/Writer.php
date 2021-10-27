@@ -4,56 +4,98 @@
 namespace Intensa\Logger;
 
 
+use Intensa\Logger\Tools\Helper;
+
 class Writer
 {
+    const DEFAULT_MEMORY_LIMIT = 10 * 1024 * 1024;
+    const FILE_MODE_APPEND = 'a';
+    const FILE_MODE_REWRITE = 'w';
+
     protected $filePath = '';
-    protected $mode = 'a';
+    protected $mode;
     protected $initFlag = false;
     protected $file;
     protected $storage = [];
+    protected $memoryLimitValue = 0;
+    protected $enableFlush = true;
 
-    public function __construct($path, $mode = 'a')
+
+    public function __construct($path)
     {
-        //$openFile = fopen($this->writeFilePath, ($this->rewriteLogFile && $this->execLogCount === 0) ? 'w' : 'a');
-        //fwrite($openFile, $strLogData);
-        //fclose($openFile);
-
         $this->filePath = $path;
-        $this->mode = $mode;
+        $this->mode = self::FILE_MODE_APPEND;
     }
 
-    public function init()
+    public function setFileModeRewrite()
     {
-        $this->file = fopen($this->filePath, $this->mode);
-        $this->initFlag = true;
+        $this->mode = self::FILE_MODE_REWRITE;
+    }
+
+    public function disableFlush()
+    {
+        $this->enableFlush = false;
     }
 
     public function write($data)
     {
         $this->storage[] = $data;
-        //$this->flushStorage();
+
+        if ($this->enableFlush) {
+            $this->flush();
+        }
     }
 
-    public function flushStorage()
+    protected function init()
     {
-        if (count($this->storage) > 10000) {
-            $this->finish();
+        $this->file = fopen($this->filePath, $this->mode);
+        $this->initFlag = true;
+    }
+
+    protected function getMemoryLimit()
+    {
+        if (empty($this->memoryLimitValue))  {
+            if ($memoryLimit = Helper::convertToBytes(ini_get('memory_limit'))) {
+                $this->memoryLimitValue = $memoryLimit / 10;
+            } else {
+                $this->memoryLimitValue = self::DEFAULT_MEMORY_LIMIT;
+            }
+        }
+
+        return $this->memoryLimitValue;
+    }
+
+    protected function resetFileMode()
+    {
+        if ($this->mode === self::FILE_MODE_REWRITE) {
+            $this->mode = self::FILE_MODE_APPEND;
+        }
+    }
+
+    protected function flush()
+    {
+        if (memory_get_usage(true) > $this->getMemoryLimit()) {
+            var_dump('flush');
+            $this->writeToStream();
             $this->storage = [];
         }
     }
 
-    public function finish()
+    protected function writeToStream()
     {
         if (!$this->initFlag) {
             $this->init();
         }
 
         fwrite($this->file, implode($this->storage));
+        fclose($this->file);
+        var_dump('write');
+        $this->resetFileMode();
     }
 
     public function __destruct()
     {
-        $this->finish();
-        fclose($this->file);
+        var_dump('distr');
+        $this->writeToStream();
     }
 }

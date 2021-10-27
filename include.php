@@ -10,4 +10,5 @@ Loader::registerAutoLoadClasses('intensa.logger', [
     'Intensa\Logger\Writer' => 'lib/general/Writer.php',
     'Intensa\Logger\Tools\LogCleaner' => 'lib/general/Tools/LogCleaner.php',
     'Intensa\Logger\Tools\DirectoryController' => 'lib/general/Tools/DirectoryController.php',
+    'Intensa\Logger\Tools\Helper' => 'lib/general/Tools/Helper.php',
 ]);

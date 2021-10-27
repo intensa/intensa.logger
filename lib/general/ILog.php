@@ -416,7 +416,19 @@ class ILog
             $logString = $this->prepareRecordHumanFormat($level, $msg, $context);
         }
 
-        $this->instantWriteFile($logString);
+
+        if ($this->canWrite) {
+
+            if ($this->convertCP1251) {
+                $logString = iconv('windows-1251', 'utf-8', $logString);
+            }
+
+            if ($this->rewriteLogFile && $this->execLogCount === 0) {
+                $this->writer->setFileModeRewrite();
+            }
+
+            $this->writer->write($logString);
+        }
 
         // отправка оповещения
         if (in_array($level, [self::ALERT, self::EMERGENCY, self::CRITICAL])) {
@@ -458,25 +470,6 @@ class ILog
         $this->writeFilePath = $this->getLogDir($this->additionalDir) . $this->getLogFileName();
         return $this->writeFilePath;
     }
-
-    /**
-     * Записывает в файл
-     * @param string $strLogData
-     */
-    protected function instantWriteFile(string $strLogData)
-    {
-        if ($this->canWrite) {
-            if ($this->convertCP1251) {
-                $strLogData = iconv('windows-1251', 'utf-8', $strLogData);
-            }
-
-            $this->writer->write($strLogData);
-            /*$openFile = fopen($this->writeFilePath, ($this->rewriteLogFile && $this->execLogCount === 0) ? 'w' : 'a');
-            fwrite($openFile, $strLogData);
-            fclose($openFile);*/
-        }
-    }
-
 
     /**
      * Через этот метод можно установить дополнительный email для получения алертов
@@ -559,7 +552,7 @@ class ILog
             if ($autoStop) {
                 $timerData['STOP_POINT'] = '__destruct';
             }
-
+            echo "<pre>"; print_r($timerData); echo "</pre>";
             $this->write(self::INFO, "Timer {$timerData['CODE']}", $timerData);
         }
     }
