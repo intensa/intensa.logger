@@ -6,37 +6,85 @@ namespace Intensa\Logger;
 
 use Intensa\Logger\Tools\Helper;
 
+/**
+ * Class Writer
+ * @package Intensa\Logger
+ */
 class Writer
 {
+    /**
+     *
+     */
     const DEFAULT_MEMORY_LIMIT = 10 * 1024 * 1024;
+    /**
+     *
+     */
     const FILE_MODE_APPEND = 'a';
+    /**
+     *
+     */
     const FILE_MODE_REWRITE = 'w';
 
+    /**
+     * @var string
+     */
     protected $filePath = '';
+    /**
+     * @var string
+     */
     protected $mode;
+    /**
+     * @var bool
+     */
     protected $initFlag = false;
+    /**
+     * @var
+     */
     protected $file;
+    /**
+     * @var array
+     */
     protected $storage = [];
+    /**
+     * @var int
+     */
     protected $memoryLimitValue = 0;
+    /**
+     * @var bool
+     */
     protected $enableFlush = true;
 
 
+    /**
+     * Writer constructor.
+     * @param $path
+     */
     public function __construct($path)
     {
         $this->filePath = $path;
         $this->mode = self::FILE_MODE_APPEND;
     }
 
+    /**
+     * Устанавливает режим w.
+     * Необходим для корректной работы логгера в режиме перезаписи файла
+     */
     public function setFileModeRewrite()
     {
         $this->mode = self::FILE_MODE_REWRITE;
     }
 
+    /**
+     *
+     */
     public function disableFlush()
     {
         $this->enableFlush = false;
     }
 
+    /**
+     * @param $data
+     */
     public function write($data)
     {
         $this->storage[] = $data;
@@ -46,12 +94,18 @@ class Writer
         }
     }
 
+    /**
+     *
+     */
     protected function init()
     {
         $this->file = fopen($this->filePath, $this->mode);
         $this->initFlag = true;
     }
 
+    /**
+     * @return float|int
+     */
     protected function getMemoryLimit()
     {
         if (empty($this->memoryLimitValue))  {
@@ -65,6 +119,9 @@ class Writer
         return $this->memoryLimitValue;
     }
 
+    /**
+     *
+     */
     protected function resetFileMode()
     {
         if ($this->mode === self::FILE_MODE_REWRITE) {
@@ -72,6 +129,9 @@ class Writer
         }
     }
 
+    /**
+     *
+     */
     protected function flush()
     {
         if (memory_get_usage(true) > $this->getMemoryLimit()) {
@@ -80,6 +140,9 @@ class Writer
         }
     }
 
+    /**
+     *
+     */
     protected function writeToStream()
     {
         if (!$this->initFlag) {
@@ -91,6 +154,9 @@ class Writer
         $this->resetFileMode();
     }
 
+    /**
+     *
+     */
     public function __destruct()
     {
         $this->writeToStream();

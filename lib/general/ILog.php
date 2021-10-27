@@ -552,7 +552,7 @@ class ILog
             if ($autoStop) {
                 $timerData['STOP_POINT'] = '__destruct';
             }
-            echo "<pre>"; print_r($timerData); echo "</pre>";
+
             $this->write(self::INFO, "Timer {$timerData['CODE']}", $timerData);
         }
     }
