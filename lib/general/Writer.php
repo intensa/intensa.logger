@@ -89,13 +89,11 @@ class Writer
 
         fwrite($this->file, implode($this->storage));
         fclose($this->file);
-        var_dump('write');
         $this->resetFileMode();
     }
 
     public function __destruct()
     {
-        var_dump('distr');
         $this->writeToStream();
     }
 }
