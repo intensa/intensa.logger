@@ -27,17 +27,11 @@ class LogCleaner
 
     public static function installAgent()
     {
-        $now = new DateTime();
-
         \CAgent::AddAgent(
             self::clear(),
             Settings::getInstance()->getModuleId(),
             'N',
-            86400,
-            $now,
-            'Y',
-            $now,
-            30
+            86400
         );
     }
 

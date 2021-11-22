@@ -12,3 +12,5 @@ Loader::registerAutoLoadClasses('intensa.logger', [
     'Intensa\Logger\Tools\DirectoryController' => 'lib/general/Tools/DirectoryController.php',
     'Intensa\Logger\Tools\Helper' => 'lib/general/Tools/Helper.php',
 ]);
+
+require  __DIR__ . '/lib/vendor/autoload.php';

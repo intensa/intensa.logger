@@ -1,5 +1,6 @@
 <?php
 defined('B_PROLOG_INCLUDED') and (B_PROLOG_INCLUDED === true) or die();
+require  __DIR__ . '/../include.php';
 
 use Bitrix\Main\Application;
 use Bitrix\Main\Loader;
@@ -79,7 +80,6 @@ class intensa_logger extends CModule
         return true;
     }
 
-
     public function createDirectory()
     {
         $dirPath = $_SERVER['DOCUMENT_ROOT'] . '/logs/';
@@ -120,12 +120,10 @@ class intensa_logger extends CModule
     {
         global $APPLICATION;
 
-        $defaultEventType = self::DEFAULT_EVENT_TYPE;
-        $defaultEventName = self::DEFAULT_EVENT_MESSAGE;
-
         $result = false;
-
+        $defaultEventType = self::DEFAULT_EVENT_TYPE;
         $arActiveSitesIDs = [];
+
         $rsSite = \CSite::GetList($by = "sort", $order = "desc", ['ACTIVE' => 'Y']);
 
         while ($site = $rsSite->Fetch()) {
@@ -136,8 +134,6 @@ class intensa_logger extends CModule
 
         $filterCEventType = ['TYPE_ID' => $defaultEventType];
         $objResultCEventType = $objCEventType->GetList($filterCEventType);
-
-
 
         if ($eventType = $objResultCEventType->Fetch()) {
             $createType = $eventType['ID'];
@@ -154,10 +150,9 @@ class intensa_logger extends CModule
             $objResultCEventMessage = $objCEventMessage->GetList($by = 'id', $order = 'desc',
                 ['TYPE_ID' => $defaultEventType]);
 
-            if ($eventMessage = $objResultCEventMessage->Fetch()) {
+            if ($objResultCEventMessage->Fetch()) {
                 $createMessage = true;
             } else {
-
                 $createMessage = $objCEventMessage->Add([
                     'ACTIVE' => 'Y',
                     'EVENT_NAME' => $defaultEventType,
@@ -173,7 +168,6 @@ class intensa_logger extends CModule
             if ($createMessage) {
                 $result = true;
             }
-
         }
 
         $appErrors = $APPLICATION->LAST_ERROR;
@@ -194,7 +188,7 @@ class intensa_logger extends CModule
             $objResultCEventMessage = $objCEventMessage->GetList($by = 'id', $order = 'desc',
                 ['TYPE_ID' => $eventType]);
 
-            while ($eventMessage = $objResultCEventMessage->Fetch()) {
+            while($eventMessage = $objResultCEventMessage->Fetch()) {
                 $objCEventMessage->Delete($eventMessage['ID']);
             }
 
