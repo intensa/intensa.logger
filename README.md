@@ -299,4 +299,4 @@ $logger->useBacktrace();
 
 ## Автор
 
-Шишкин Иван - i.shishkin@intensa.ru - [facebook](https://www.facebook.com/profile.php?id=100004186636633)
+Шишкин Иван - i.shishkin@intensa.ru - [telegram @ishishkin](https://t.me/ishishkin)
