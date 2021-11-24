@@ -1,0 +1,17 @@
+{
+    "name": "intensa/logger",
+    "authors": [
+        {
+            "name": "Ivan Shishkin",
+            "email": "info@intensa.ru"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Intensa\\Logger\\": "general/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    }
+}

@@ -1,1 +1,5 @@
 .idea/
+logger.config.php
+temp_logs/
+vendor
+/lib/.phpunit.result.cache

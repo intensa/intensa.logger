@@ -1,5 +1,6 @@
 <?php
 
+
 namespace Intensa\Logger;
 
 
@@ -20,22 +21,22 @@ class ILogTimer
         $this->timeStart = microtime(true);
     }
 
-    public function setStartPoint($fl)
+    public function setStartPoint($startPoint)
     {
-        $this->startPoint = $fl;
+        $this->startPoint = $startPoint;
     }
 
-    public function setEndPoint($fl)
+    public function setEndPoint($endPoint)
     {
-        $this->endPoint = $fl;
+        $this->endPoint = $endPoint;
     }
 
-    public function isDie()
+    public function isDie(): bool
     {
         return $this->die;
     }
 
-    public function stop()
+    public function stop(): ILogTimer
     {
         $this->timeEnd = microtime(true);
         $this->execTime = $this->timeEnd - $this->timeStart;
@@ -44,7 +45,7 @@ class ILogTimer
         return $this;
     }
 
-    public function getTimerData()
+    public function getTimerData(): array
     {
         $data = [
             'CODE' => $this->timerCode,
@@ -53,8 +54,7 @@ class ILogTimer
             'EXEC_TIME' => number_format($this->execTime, 9),
         ];
 
-        if (!empty($this->startPoint) || !empty($this->endPoint))
-        {
+        if (!empty($this->startPoint) || !empty($this->endPoint)) {
             $data['START_POINT'] = $this->startPoint;
             $data['STOP_POINT'] = $this->endPoint;
         }
@@ -62,24 +62,5 @@ class ILogTimer
         return $data;
     }
 
-    public function getTimeStart()
-    {
-        return $this->timeStart;
-    }
-
-    public function getTimeEnd()
-    {
-        return $this->timeEnd;
-    }
-
-    public function getExecTime()
-    {
-        return $this->execTime;
-    }
-
-    public function getTimerCode()
-    {
-        return $this->timerCode;
-    }
 
 }

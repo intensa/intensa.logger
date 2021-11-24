@@ -1,5 +1,7 @@
 <?
 $arModuleVersion = array(
-    "VERSION" => "0.0.1",
-    "VERSION_DATE" => "2018-09-28 10:10:10"
+    'VERSION' => '1.0.0',
+    'VERSION_DATE' => '2021-08-27 10:00:00',
+    'MODULE_NAME' => GetMessage('LOGGER_MODULE_NAME'),
+    'MODULE_DESCRIPTION' => GetMessage('LOGGER_MODULE_DESCRIPTION')
 );

@@ -1,10 +1,16 @@
 <?php
 use Bitrix\Main\Loader;
-//use Bitrix\Main\EventManager;
 
-Loader::registerAutoLoadClasses('intensa.logger', array(
-    'Intensa\Logger\Settings'	=> 'classes/general/Settings.php',
-    'Intensa\Logger\ILog'	=> 'classes/general/ILog.php',
-    'Intensa\Logger\ILogAlert'	=> 'classes/general/ILogAlert.php',
-    'Intensa\Logger\ILogTimer'	=> 'classes/general/ILogTimer.php',
-));
+Loader::registerAutoLoadClasses('intensa.logger', [
+    'Intensa\Logger\Settings' => 'lib/general/Settings.php',
+    'Intensa\Logger\ILog' => 'lib/general/ILog.php',
+    'Intensa\Logger\ILogAlert' => 'lib/general/ILogAlert.php',
+    'Intensa\Logger\ILogTimer' => 'lib/general/ILogTimer.php',
+    'Intensa\Logger\ILogSql' => 'lib/general/ILogSql.php',
+    'Intensa\Logger\Writer' => 'lib/general/Writer.php',
+    'Intensa\Logger\Tools\LogCleaner' => 'lib/general/Tools/LogCleaner.php',
+    'Intensa\Logger\Tools\DirectoryController' => 'lib/general/Tools/DirectoryController.php',
+    'Intensa\Logger\Tools\Helper' => 'lib/general/Tools/Helper.php',
+]);
+
+require  __DIR__ . '/lib/vendor/autoload.php';
