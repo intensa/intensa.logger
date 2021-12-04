@@ -7,7 +7,6 @@ use Bitrix\Main\Loader;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\ModuleManager;
 
-
 if (class_exists('intensa_logger')) {
     return;
 }
@@ -16,7 +15,7 @@ class intensa_logger extends CModule
 {
     const DEFAULT_EVENT_TYPE = 'INTENSA_LOGGER_ALERT';
     const DEFAULT_EVENT_MESSAGE = 'INTENSA_LOGGER_FATAL_TEMPLATE';
-    public $MODULE_ID;
+    public $MODULE_ID = 'intensa.logger';
     public $MODULE_VERSION;
     public $MODULE_VERSION_DATE;
     public $MODULE_NAME;
@@ -33,7 +32,6 @@ class intensa_logger extends CModule
         $path = substr($path, 0, strlen($path) - strlen("/index.php"));
         include($path . "/version.php");
 
-        $this->MODULE_ID = 'intensa.logger';
         $this->MODULE_VERSION = $arModuleVersion['VERSION'];
         $this->MODULE_VERSION_DATE = $arModuleVersion['VERSION_DATE'];
         $this->MODULE_NAME = GetMessage('LOGGER_MODULE_NAME');
@@ -43,7 +41,7 @@ class intensa_logger extends CModule
         $this->PARTNER_URI = 'https://intensa.ru';
     }
 
-    public function doInstall()
+    public function DoInstall()
     {
         global $APPLICATION;
         $createDir = $this->createDirectory();
@@ -61,7 +59,7 @@ class intensa_logger extends CModule
         }
     }
 
-    public function doUninstall()
+    public function DoUninstall()
     {
         $this->removeSendEvent();
         $this->unInstallAgents();
