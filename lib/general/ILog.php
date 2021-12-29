@@ -138,10 +138,11 @@ class ILog
 
     /**
      * ILog constructor.
-     * @param string $code
+     * @param string $code код логгера
+     * @param string $additionalLogDir дополнительная директория для хранения логов
      * @throws \Exception
      */
-    public function __construct(string $code = '')
+    public function __construct(string $code = '', string $additionalLogDir = '')
     {
         $this->settings = Settings::getInstance();
         $this->dateFormat = $this->settings->DATE_FORMAT();
@@ -150,10 +151,13 @@ class ILog
 
         $this->filePermission = $this->prepareFilePermissionMask($this->settings->LOG_FILE_PERMISSION());
 
+        if (!empty($additionalLogDir)) {
+            $this->setAdditionalDir($additionalLogDir);
+        }
+
         try {
             $filePath = $this->initWriteFilePath();
             $this->writer = new Writer($filePath);
-
         } catch (\Exception $e) {
             $this->canWrite = false;
         }
@@ -296,6 +300,8 @@ class ILog
      */
     public function setAdditionalDir(string $dirName)
     {
+        $dirName = str_replace(['/', '\\'], '', $dirName);
+
         if (!empty($dirName)) {
             $this->additionalDir = $dirName;
         }
