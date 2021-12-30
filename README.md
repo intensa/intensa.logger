@@ -16,7 +16,13 @@
 
 ## Установка модуля
 
-Модуль можно установить через маркетплейс [http://marketplace.1c-bitrix.ru/solutions/intensa.logger/](http://marketplace.1c-bitrix.ru/solutions/intensa.logger/)
+Самый простой способ добавить модуль в свой проект - это выполнить установку через маркетплейс [http://marketplace.1c-bitrix.ru/solutions/intensa.logger/](http://marketplace.1c-bitrix.ru/solutions/intensa.logger/).
+
+Также возможно установить модуль вручную. Для этого нужно:
+1. Клонировать репозиторий в директорию с модулями `/bitrix/modules/` или `/local/modules/`
+2. Перейти в директорию `intensa.logger/lib` (команда `cd intensa.logger/lib`)
+3. Установить зависимости `composer install --no-dev`
+4. Выполнить установку модуля через админ часть сайта `/bitrix/admin/partner_modules.php`
 
 При установке модуль создает:
 
