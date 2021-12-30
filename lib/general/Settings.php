@@ -60,7 +60,7 @@ class Settings
         foreach ($this->optionsList as $optionCode => $value) {
 
             if ($optionCode === 'LOG_DIR') {
-                $optionValue = $_SERVER['DOCUMENT_ROOT'] . $value;
+                $value = $_SERVER['DOCUMENT_ROOT'] . $value;
             }
 
             \COption::SetOptionString($this->getModuleId(), $optionCode, $value);
