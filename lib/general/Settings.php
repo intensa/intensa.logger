@@ -34,7 +34,7 @@ class Settings
         'CEVENT_MESSAGE' => 'INTENSA_LOGGER_FATAL_TEMPLATE',
         'USE_CP1251' => 'N',
         'ALERT_EMAIL' => '',
-        'WRITE_JSON' => 'Y',
+        'WRITE_JSON' => 'N',
         'CLEAR_LOGS_TIME' => 'never'
     ];
 
