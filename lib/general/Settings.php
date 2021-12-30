@@ -34,7 +34,7 @@ class Settings
         'CEVENT_MESSAGE' => 'INTENSA_LOGGER_FATAL_TEMPLATE',
         'USE_CP1251' => 'N',
         'ALERT_EMAIL' => '',
-        'WRITE_JSON' => 'Y',
+        'WRITE_JSON' => 'N',
         'CLEAR_LOGS_TIME' => 'never'
     ];
 
@@ -53,6 +53,18 @@ class Settings
         }
 
         return self::$instance;
+    }
+
+    public function installOptions()
+    {
+        foreach ($this->optionsList as $optionCode => $value) {
+
+            if ($optionCode === 'LOG_DIR') {
+                $value = $_SERVER['DOCUMENT_ROOT'] . $value;
+            }
+
+            \COption::SetOptionString($this->getModuleId(), $optionCode, $value);
+        }
     }
 
     public function getDefaultOptionValue($optionCode) : string

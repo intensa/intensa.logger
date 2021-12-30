@@ -50,6 +50,7 @@ class intensa_logger extends CModule
         $this->createSendEvent();
         $this->installAgents();
 
+        \Intensa\Logger\Settings::getInstance()->installOptions();
 
         if (!empty($this->errors)) {
             $APPLICATION->ThrowException(implode('<br>', $this->errors));
