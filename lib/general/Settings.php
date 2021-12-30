@@ -55,6 +55,18 @@ class Settings
         return self::$instance;
     }
 
+    public function installOptions()
+    {
+        foreach ($this->optionsList as $optionCode => $value) {
+
+            if ($optionCode === 'LOG_DIR') {
+                $optionValue = $_SERVER['DOCUMENT_ROOT'] . $value;
+            }
+
+            \COption::SetOptionString($this->getModuleId(), $optionCode, $value);
+        }
+    }
+
     public function getDefaultOptionValue($optionCode) : string
     {
         $return = '';
