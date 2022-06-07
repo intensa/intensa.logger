@@ -34,7 +34,7 @@ class ILogAlert
         // добавим дополнительные адреса
         $additionalEmail = $this->getAdditionalEmail();
 
-        if (!empty($additionalEmail) && is_array($additionalEmail)) {
+        if (!empty($additionalEmail)) {
             $strEmails = implode(',', $additionalEmail);
             if (!empty($strEmails)) {
                 $emails .= ',' . $strEmails;
@@ -64,7 +64,8 @@ class ILogAlert
 
             \CEvent::SendImmediate(
                 $this->settings->CEVENT_TYPE(),
-                SITE_ID, $arEventFields,
+                SITE_ID,
+                $arEventFields,
                 'N',
                 $this->settings->CEVENT_MESSAGE()
             );
