@@ -11,8 +11,8 @@ namespace Intensa\Logger;
 class SqlTracker
 {
     protected $connection = null;
-    protected $trackersData = [];
-    protected $trackerPull = [];
+    protected array $trackersData = [];
+    protected array $trackerPull = [];
 
     public function __construct()
     {
@@ -21,9 +21,9 @@ class SqlTracker
 
     /**
      * Запускает отслеживание запросов для переданного кода.
-     * @param $code
+     * @param string $code
      */
-    public function start($code)
+    public function start(string $code)
     {
         if (!empty($this->trackerPull)) {
 
@@ -44,10 +44,10 @@ class SqlTracker
 
     /**
      * Добавляет трекер в пулл трекеров
-     * @param $code
+     * @param string $code
      * @param $tracker
      */
-    protected function setTracker($code, $tracker)
+    protected function setTracker(string $code, $tracker)
     {
         $this->trackerPull[$code] = [
             'code' => $code,
@@ -82,21 +82,25 @@ class SqlTracker
 
     /**
      * Получение трекера по коду
-     * @param $code
-     * @return mixed
+     * @param string $code
+     * @return ?array
      */
-    public function getTracker($code)
+    public function getTracker(string $code): array
     {
+        $result = [];
+
         if (array_key_exists($code, $this->trackerPull)) {
-            return $this->trackerPull[$code];
+            $result = $this->trackerPull[$code];
         }
+
+        return $result;
     }
 
     /**
      * Устанавливает флаг завершенности трекера
-     * @param $code
+     * @param string $code
      */
-    protected function finishTracker($code)
+    protected function finishTracker(string $code)
     {
         if (array_key_exists($code, $this->trackerPull)) {
             $this->trackerPull[$code]['finish'] = true;
@@ -105,10 +109,10 @@ class SqlTracker
 
     /**
      * Устанавливает данные запросов для конкретного трекера
-     * @param $code
-     * @param $data
+     * @param string $code
+     * @param array $data
      */
-    protected function setTrackerData($code, $data)
+    protected function setTrackerData(string $code, array $data)
     {
         if (array_key_exists($code, $this->trackerPull)) {
             $this->trackerPull[$code]['data'] = $data;
@@ -133,7 +137,7 @@ class SqlTracker
     }
 
     /**
-     * Останавливает трекер с переданым в качестве аргумента кодом.
+     * Останавливает трекер с переданным в качестве аргумента кодом.
      * Возвращает массив запросов и время их выполнения
      * @param $code
      * @return array

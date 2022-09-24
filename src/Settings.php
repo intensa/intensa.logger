@@ -21,9 +21,13 @@ namespace Intensa\Logger;
  */
 class Settings
 {
-    protected $settings = [];
-    private static $instance = null;
-    private $optionsList = [
+    const MODULE_ID = 'intensa.logger';
+
+    protected array $settings = [];
+
+    private static ?Settings $instance = null;
+
+    private array $optionsList = [
         'LOG_DIR' => '/logs/',
         'LOG_FILE_EXTENSION' => '.log',
         'LOG_FILE_PERMISSION' => '0775',
@@ -67,7 +71,7 @@ class Settings
         }
     }
 
-    public function getDefaultOptionValue($optionCode) : string
+    public function getDefaultOptionValue(string $optionCode) : string
     {
         $return = '';
 
@@ -84,7 +88,7 @@ class Settings
         return $return;
     }
 
-    public function checkDirSecurity($logDir) : bool
+    public function checkDirSecurity(string $logDir) : bool
     {
         $htaccessPath = $logDir . '.htaccess';
         $result = false;
@@ -110,7 +114,7 @@ class Settings
         return $result;
     }
 
-    public function checkDirAvailability($logDir) : bool
+    public function checkDirAvailability(string $logDir) : bool
     {
         $result = false;
 
@@ -121,9 +125,9 @@ class Settings
         return $result;
     }
 
-    public function getModuleId()
+    public function getModuleId(): string
     {
-        return 'intensa.logger';
+        return self::MODULE_ID;
     }
 
     public function __call($name, $arg = [])

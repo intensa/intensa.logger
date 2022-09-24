@@ -12,48 +12,46 @@ use Intensa\Logger\Tools\Helper;
  */
 class Writer
 {
-    /**
-     *
-     */
     const DEFAULT_MEMORY_LIMIT = 10 * 1024 * 1024;
-    /**
-     *
-     */
+
     const FILE_MODE_APPEND = 'a';
-    /**
-     *
-     */
+
     const FILE_MODE_REWRITE = 'w';
 
     /**
      * @var string
      */
-    protected $filePath = '';
+    protected string $filePath = '';
+
     /**
      * @var string
      */
-    protected $mode;
+    protected string $mode;
+
     /**
      * @var bool
      */
-    protected $initFlag = false;
+    protected bool $initFlag = false;
+
     /**
      * @var
      */
     protected $file;
+
     /**
      * @var array
      */
-    protected $storage = [];
+    protected array $storage = [];
+
     /**
      * @var int
      */
-    protected $memoryLimitValue = 0;
+    protected int $memoryLimitValue = 0;
+
     /**
      * @var bool
      */
-    protected $enableFlush = true;
-
+    protected bool $enableFlush = true;
 
     /**
      * Writer constructor.

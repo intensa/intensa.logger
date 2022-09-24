@@ -1,41 +1,81 @@
 <?php
 
-
 namespace Intensa\Logger;
 
-
+/**
+ * Class Timer
+ * @package Intensa\Logger
+ */
 class Timer
 {
-    protected $timerCode = '';
-    protected $timeStart = 0;
-    protected $timeEnd = 0;
-    protected $execTime = 0;
-    protected $die = false;
-    protected $startPoint = null;
-    protected $endPoint = null;
+    /**
+     * @var string
+     */
+    protected string $timerCode = '';
+    /**
+     * @var int
+     */
+    protected int $timeStart = 0;
+    /**
+     * @var int
+     */
+    protected int $timeEnd = 0;
+    /**
+     * @var int
+     */
+    protected int $execTime = 0;
+    /**
+     * @var bool
+     */
+    protected bool $die = false;
+    /**
+     * @var string
+     */
+    protected string $startPoint = '';
+    /**
+     * @var string
+     */
+    protected string $endPoint = '';
 
-    public function __construct($code = 'nameless')
+    /**
+     * @param string $code
+     */
+    public function __construct(string $code = 'nameless')
     {
         $code = trim($code);
         $this->timerCode = $code;
         $this->timeStart = microtime(true);
     }
 
-    public function setStartPoint($startPoint)
+    /**
+     * @param string $startPoint
+     * @return void
+     */
+    public function setStartPoint(string $startPoint)
     {
         $this->startPoint = $startPoint;
     }
 
-    public function setEndPoint($endPoint)
+    /**
+     * @param string $endPoint
+     * @return void
+     */
+    public function setEndPoint(string $endPoint)
     {
         $this->endPoint = $endPoint;
     }
 
+    /**
+     * @return bool
+     */
     public function isDie(): bool
     {
         return $this->die;
     }
 
+    /**
+     * @return $this
+     */
     public function stop(): Timer
     {
         $this->timeEnd = microtime(true);
@@ -45,6 +85,9 @@ class Timer
         return $this;
     }
 
+    /**
+     * @return array
+     */
     public function getTimerData(): array
     {
         $data = [
@@ -61,6 +104,4 @@ class Timer
 
         return $data;
     }
-
-
 }
