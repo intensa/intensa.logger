@@ -83,7 +83,7 @@
 
 // инициализация объекта логгера.
 // в конструктор передаем код логгера, ему будет соответствовать имя лог-файла
-$logger = new \Intensa\Logger\ILog('logger_code');
+$logger = new \Intensa\Logger\Logger('logger_code');
 
 // пример записи логов уровня INFO
 // вторым параметром можно передать данные любого типа
@@ -148,7 +148,7 @@ $logger->fatal('и опять сломали!', $context);
 
 // инициализация объекта логгера.
 // в конструктор передаем код логгера, ему будет соответствовать имя лог-файла
-$logger = new \Intensa\Logger\ILog('logger_timer');
+$logger = new \Intensa\Logger\Logger('logger_timer');
 
 $context = ['яблоко', 'мандарин', 'банан'];
 $logger->info('Логируем какие-то данные', $context);
@@ -232,7 +232,7 @@ $logger->startTimer('dont_stop');
 ```php
 \Bitrix\Main\Loader::includeModule('intensa.logger');
 
-$logger = new \Intensa\Logger\ILog('logger_sql');
+$logger = new \Intensa\Logger\Logger('logger_sql');
 // запускаем трекер sql запросов
 $logger->startSqlTracker('get_users');
 // пример кода, который делает запрос к базе данных
@@ -274,7 +274,7 @@ LIMIT 0, 3
 ```php
 \Bitrix\Main\Loader::includeModule('intensa.logger');
 
-$logger = new \Intensa\Logger\ILog('logger_sql');
+$logger = new \Intensa\Logger\Logger('logger_sql');
 
 // Метод заставляет логгер перезаписывать файл при каждом новом вызове логирующего метода
 // Обычно данная фича может приходится при дебаге

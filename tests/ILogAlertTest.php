@@ -12,7 +12,7 @@ class ILogAlertTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->obj = new ILogAlert(new ILog());
+        $this->obj = new ILogAlert(new Logger());
     }
 
     public function testSetAdditionalEmail()

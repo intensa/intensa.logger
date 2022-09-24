@@ -4,7 +4,7 @@
 namespace Intensa\Logger;
 
 
-class ILogTimer
+class Timer
 {
     protected $timerCode = '';
     protected $timeStart = 0;
@@ -36,7 +36,7 @@ class ILogTimer
         return $this->die;
     }
 
-    public function stop(): ILogTimer
+    public function stop(): Timer
     {
         $this->timeEnd = microtime(true);
         $this->execTime = $this->timeEnd - $this->timeStart;

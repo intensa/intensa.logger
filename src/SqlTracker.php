@@ -8,7 +8,7 @@ namespace Intensa\Logger;
  * Class ILogSql
  * @package Intensa\Logger
  */
-class ILogSql
+class SqlTracker
 {
     protected $connection = null;
     protected $trackersData = [];

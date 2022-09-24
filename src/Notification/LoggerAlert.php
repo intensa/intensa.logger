@@ -2,13 +2,13 @@
 
 namespace Intensa\Logger\Notification;
 
-use Intensa\Logger\ILog;
+use Intensa\Logger\Logger;
 
 final class LoggerAlert
 {
     protected $logger = null;
 
-    public function __construct(ILog $logger)
+    public function __construct(Logger $logger)
     {
 
     }

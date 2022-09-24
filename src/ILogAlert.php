@@ -10,7 +10,7 @@ class ILogAlert
     protected $settings = null;
     protected $additionalEmail = [];
 
-    public function __construct(ILog $obj)
+    public function __construct(Logger $obj)
     {
         $this->settings = Settings::getInstance();
         $this->objILog = $obj;
