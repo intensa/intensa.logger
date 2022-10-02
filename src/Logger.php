@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Intensa\Logger;
 
 use Psr\Log\LoggerInterface;
@@ -24,9 +23,9 @@ class Logger implements LoggerInterface
     protected string $dateFormat = '';
 
     /**
-     * @var bool
+     * @var string
      */
-    protected bool $additionalDir = false;
+    protected string $additionalDir = '';
 
     /**
      * @var string
@@ -39,9 +38,9 @@ class Logger implements LoggerInterface
     protected ?Settings $settings = null;
 
     /**
-     * @var bool
+     * @var string
      */
-    protected bool $initLogDir = false;
+    protected string $initLogDir = '';
 
     /**
      * @var bool|int
@@ -49,9 +48,9 @@ class Logger implements LoggerInterface
     protected $identifier = false;
 
     /**
-     * @var bool
+     * @var string
      */
-    protected bool $writeFilePath = false;
+    protected string $writeFilePath = '';
 
     /**
      * @var bool
@@ -157,7 +156,7 @@ class Logger implements LoggerInterface
      */
     public function initLogDir() : string
     {
-        if ($this->initLogDir === false) {
+        if (empty($this->initLogDir)) {
             $path = $this->getLogDirPath();
             $day = date('Y-m-d');
             $currentDayLogDir = $path . $day;
@@ -390,7 +389,7 @@ class Logger implements LoggerInterface
         } else {
             $logString = $this->prepareRecordHumanFormat($level, $msg, $context);
         }
-
+        var_dump($this->canWrite);
         if ($this->canWrite) {
 
             if ($this->convertCP1251) {
@@ -400,7 +399,7 @@ class Logger implements LoggerInterface
             if ($this->rewriteLogFile && $this->execLogCount === 0) {
                 $this->writer->setFileModeRewrite();
             }
-
+            var_dump($logString);
             $this->writer->write($logString);
         }
 
