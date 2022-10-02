@@ -4,6 +4,7 @@ namespace Intensa\Logger;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use Intensa\Logger\Tools\Settings;
 
 /**
  * Class Logger
@@ -154,7 +155,7 @@ class Logger implements LoggerInterface
      * @return bool|string
      * @throws
      */
-    public function initLogDir() : string
+    public function initLogDir(): string
     {
         if (empty($this->initLogDir)) {
             $path = $this->getLogDirPath();
@@ -317,15 +318,7 @@ class Logger implements LoggerInterface
             }
         }
 
-        if (is_array($context) || is_object($context)) {
-            $logContext = var_export($context, 1);
-        } elseif (is_bool($context)) {
-            $logContext = ($context) ? 'true' : 'false';
-        } elseif (is_null($context)) {
-            $logContext = 'null';
-        } else {
-            $logContext = $context;
-        }
+        $logContext = var_export($context, 1);
 
         $logData = [
             $date,
@@ -336,8 +329,20 @@ class Logger implements LoggerInterface
             $logContext
         ];
 
-        return str_replace(['{date}', '{level}', '{pid}', '{file}', '{message}', '{context}'], $logData,
-                self::LOG_TEMPLATE) . PHP_EOL;
+        return str_replace(
+                ['{date}', '{level}', '{pid}', '{file}', '{message}', '{context}'],
+                $logData,
+                self::LOG_TEMPLATE
+            );
+        //{date}{level}{pid}{file} {message} {context}
+
+    /*    return sprintf('%s%s%s%s %s %s',$date,
+            $level,
+            $pid,
+            $file,
+            $message,
+            $logContext);*/
+
     }
 
     /**
@@ -346,7 +351,7 @@ class Logger implements LoggerInterface
      * @param $context
      * @return string
      */
-    public function prepareRecordJsonFormat($level, $msg, $context) : string
+    public function prepareRecordJsonFormat($level, $msg, $context): string
     {
         $logItems = [
             'time' => date($this->dateFormat),
@@ -389,7 +394,7 @@ class Logger implements LoggerInterface
         } else {
             $logString = $this->prepareRecordHumanFormat($level, $msg, $context);
         }
-        var_dump($this->canWrite);
+
         if ($this->canWrite) {
 
             if ($this->convertCP1251) {
@@ -399,7 +404,9 @@ class Logger implements LoggerInterface
             if ($this->rewriteLogFile && $this->execLogCount === 0) {
                 $this->writer->setFileModeRewrite();
             }
-            var_dump($logString);
+
+            $logString .= PHP_EOL;
+
             $this->writer->write($logString);
         }
 

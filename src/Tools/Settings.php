@@ -1,6 +1,6 @@
 <?php
 
-namespace Intensa\Logger;
+namespace Intensa\Logger\Tools;
 
 /**
  * Class Settings

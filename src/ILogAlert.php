@@ -1,8 +1,8 @@
 <?php
 
-
 namespace Intensa\Logger;
 
+use Intensa\Logger\Tools\Settings;
 
 class ILogAlert
 {

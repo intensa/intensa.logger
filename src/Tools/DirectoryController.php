@@ -2,7 +2,7 @@
 
 namespace Intensa\Logger\Tools;
 
-use Intensa\Logger\Settings;
+use Intensa\Logger\Tools\Settings;
 
 class DirectoryController
 {

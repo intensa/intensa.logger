@@ -3,13 +3,13 @@
 
 namespace Intensa\Logger\Tools;
 
-use Intensa\Logger\Settings;
+use Intensa\Logger\Tools\Settings;
 
 class LogCleaner
 {
-    protected $clearTime = 0;
-    protected $rootLogDirectory = '';
-    protected $allowExecute = false;
+    protected int $clearTime = 0;
+    protected string $rootLogDirectory = '';
+    protected bool $allowExecute = false;
 
     public function __construct()
     {
