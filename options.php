@@ -67,21 +67,21 @@ $tabControl = new CAdminTabControl('tabControl', [
 $logDirOptionValue = COption::GetOptionString(
     LOGGER_MODULE_NAME,
     'LOG_DIR',
-    \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('LOG_DIR')
+    \Intensa\Logger\Tools\Settings::getInstance()->getDefaultOptionValue('LOG_DIR')
 );
 
 $logDirLabel = getMessage('LOG_DIR');
 
 if (strpos($_SERVER['SERVER_SOFTWARE'], 'Apache') !== false) {
 
-    if (\Intensa\Logger\Settings::getInstance()->checkDirSecurity($logDirOptionValue)) {
+    if (\Intensa\Logger\Tools\Settings::getInstance()->checkDirSecurity($logDirOptionValue)) {
         $logDirLabel .= '<br>' . getMessage('SECURITY_LOG_DIR_TRUE');
     } else {
         $logDirLabel .= '<br>' . getMessage('SECURITY_LOG_DIR_FALSE');
     }
 }
 
-if (\Intensa\Logger\Settings::getInstance()->checkDirAvailability($logDirOptionValue)) {
+if (\Intensa\Logger\Tools\Settings::getInstance()->checkDirAvailability($logDirOptionValue)) {
     $logDirLabel .= '<br>' . getMessage('AVAIL_LOG_DIR_TRUE');
 } else {
     $logDirLabel .= '<br>' . getMessage('AVAIL_LOG_DIR_FALSE');
@@ -100,7 +100,7 @@ $arAllOptions = [
         COption::GetOptionString(
             LOGGER_MODULE_NAME,
             'LOG_FILE_EXTENSION',
-            \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('LOG_FILE_EXTENSION')
+            \Intensa\Logger\Tools\Settings::getInstance()->getDefaultOptionValue('LOG_FILE_EXTENSION')
         ),
         ['text']
     ],
@@ -110,7 +110,7 @@ $arAllOptions = [
         COption::GetOptionString(
             LOGGER_MODULE_NAME,
             'LOG_FILE_PERMISSION',
-            \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('LOG_FILE_PERMISSION')
+            \Intensa\Logger\Tools\Settings::getInstance()->getDefaultOptionValue('LOG_FILE_PERMISSION')
         ),
         [
             'selectbox',
@@ -128,7 +128,7 @@ $arAllOptions = [
         COption::GetOptionString(
             LOGGER_MODULE_NAME,
             'DATE_FORMAT',
-            \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('DATE_FORMAT')
+            \Intensa\Logger\Tools\Settings::getInstance()->getDefaultOptionValue('DATE_FORMAT')
         ),
         ['text']
     ],
@@ -138,7 +138,7 @@ $arAllOptions = [
         COption::GetOptionString(
                 LOGGER_MODULE_NAME,
                 'USE_BACKTRACE',
-                \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('USE_BACKTRACE')
+                \Intensa\Logger\Tools\Settings::getInstance()->getDefaultOptionValue('USE_BACKTRACE')
         ),
         ['checkbox']
     ],
@@ -148,7 +148,7 @@ $arAllOptions = [
         COption::GetOptionString(
             LOGGER_MODULE_NAME,
             'DEV_MODE',
-            \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('DEV_MODE')
+            \Intensa\Logger\Tools\Settings::getInstance()->getDefaultOptionValue('DEV_MODE')
         ),
         ['checkbox']
     ],
@@ -158,7 +158,7 @@ $arAllOptions = [
         COption::GetOptionString(
             LOGGER_MODULE_NAME,
             'CEVENT_TYPE',
-            \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('CEVENT_TYPE')
+            \Intensa\Logger\Tools\Settings::getInstance()->getDefaultOptionValue('CEVENT_TYPE')
         ),
         ['text']
     ],
@@ -168,7 +168,7 @@ $arAllOptions = [
         COption::GetOptionString(
             LOGGER_MODULE_NAME,
             'CEVENT_MESSAGE',
-            \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('CEVENT_MESSAGE')
+            \Intensa\Logger\Tools\Settings::getInstance()->getDefaultOptionValue('CEVENT_MESSAGE')
         ),
         ['text']
     ],
@@ -178,7 +178,7 @@ $arAllOptions = [
         COption::GetOptionString(
             LOGGER_MODULE_NAME,
             'USE_CP1251',
-            \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('USE_CP1251')
+            \Intensa\Logger\Tools\Settings::getInstance()->getDefaultOptionValue('USE_CP1251')
         ),
         ['checkbox']
     ],
@@ -188,7 +188,7 @@ $arAllOptions = [
         COption::GetOptionString(
             LOGGER_MODULE_NAME,
             'ALERT_EMAIL',
-            \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('ALERT_EMAIL')
+            \Intensa\Logger\Tools\Settings::getInstance()->getDefaultOptionValue('ALERT_EMAIL')
         ),
         ['text']
     ],
@@ -198,7 +198,7 @@ $arAllOptions = [
         COption::GetOptionString(
             LOGGER_MODULE_NAME,
             'WRITE_JSON',
-            \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('WRITE_JSON')
+            \Intensa\Logger\Tools\Settings::getInstance()->getDefaultOptionValue('WRITE_JSON')
         ),
         ['checkbox']
     ],
@@ -208,7 +208,7 @@ $arAllOptions = [
         COption::GetOptionString(
             LOGGER_MODULE_NAME,
             'CLEAR_LOGS_TIME',
-            \Intensa\Logger\Settings::getInstance()->getDefaultOptionValue('CLEAR_LOGS_TIME')
+            \Intensa\Logger\Tools\Settings::getInstance()->getDefaultOptionValue('CLEAR_LOGS_TIME')
         ),
         [
             'selectbox',

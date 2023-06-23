@@ -1,8 +1,8 @@
 <?php
 
-
 namespace Intensa\Logger;
 
+use Intensa\Logger\Tools\Settings;
 
 class ILogAlert
 {
@@ -10,7 +10,7 @@ class ILogAlert
     protected $settings = null;
     protected $additionalEmail = [];
 
-    public function __construct(ILog $obj)
+    public function __construct(Logger $obj)
     {
         $this->settings = Settings::getInstance();
         $this->objILog = $obj;
@@ -34,7 +34,7 @@ class ILogAlert
         // добавим дополнительные адреса
         $additionalEmail = $this->getAdditionalEmail();
 
-        if (!empty($additionalEmail) && is_array($additionalEmail)) {
+        if (!empty($additionalEmail)) {
             $strEmails = implode(',', $additionalEmail);
             if (!empty($strEmails)) {
                 $emails .= ',' . $strEmails;
@@ -64,7 +64,8 @@ class ILogAlert
 
             \CEvent::SendImmediate(
                 $this->settings->CEVENT_TYPE(),
-                SITE_ID, $arEventFields,
+                SITE_ID,
+                $arEventFields,
                 'N',
                 $this->settings->CEVENT_MESSAGE()
             );
