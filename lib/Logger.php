@@ -1,79 +1,49 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Intensa\Logger;
 
+use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
+use Intensa\Logger\Tools\Settings;
+
 /**
- * Class ILog
- * @method void debug(string $message, mixed $context)
- * @method void log(string $message, mixed $context)
- * @method void info(string $message, mixed $context)
- * @method void notice(string $message, mixed $context)
- * @method void warning(string $message, mixed $context)
- * @method void error(string $message, mixed $context)
- * @method void critical(string $message, mixed $context)
- * @method void alert(string $message, mixed $context)
- * @method void fatal(string $message, mixed $context)
- * @method void emergency(string $message, mixed $context)
+ * Class Logger
  * @package Intensa\Logger
  */
-class ILog
+class Logger implements LoggerInterface
 {
 
     /**
-     * Шаблон элементов для лог файла
+     * Шаблон записей в лог-файле
      */
-    const LOG_TEMPLATE = '{date}{level}{pid}{file} {message} {context}';
-
-    const EMERGENCY = 'emergency';
-    const ALERT = 'alert';
-    const CRITICAL = 'critical';
-    const ERROR = 'error';
-    const WARNING = 'warning';
-    const NOTICE = 'notice';
-    const INFO = 'info';
-    const DEBUG = 'debug';
-
-    /**
-     * Константа связывающая метод класса и уровень лога
-     */
-    const METHOD_MATCH_LEVEL = [
-        'emergency' => self::EMERGENCY,
-        'fatal' => self::ALERT,
-        'alert' => self::ALERT,
-        'critical' => self::CRITICAL,
-        'error' => self::ERROR,
-        'warning' => self::WARNING,
-        'notice' => self::NOTICE,
-        'info' => self::INFO,
-        'log' => self::INFO,
-        'debug' => self::DEBUG,
-    ];
+    const LOG_TEMPLATE = '{date}{file}{level}: {message} {context}';
 
     /**
      * @var string
      */
-    protected $dateFormat = '';
-
-    /**
-     * @var bool
-     */
-    protected $additionalDir = false;
+    protected string $dateFormat = '';
 
     /**
      * @var string
      */
-    protected $loggerCode = '';
+    protected string $additionalDir = '';
+
+    /**
+     * @var string
+     */
+    protected string $loggerCode = '';
 
     /**
      * @var Settings|null
      */
-    protected $settings = null;
+    protected ?Settings $settings = null;
 
     /**
-     * @var bool
+     * @var string
      */
-    protected $initLogDir = false;
+    protected string $initLogDir = '';
 
     /**
      * @var bool|int
@@ -81,60 +51,57 @@ class ILog
     protected $identifier = false;
 
     /**
-     * @var bool
+     * @var string
      */
-    protected $writeFilePath = false;
+    protected string $writeFilePath = '';
+
+    /**
+     * @var string
+     */
+    protected string $execPathFile = '';
 
     /**
      * @var bool
      */
-    protected $execPathFile = false;
+    protected bool $useBacktrace = false;
 
     /**
      * @var bool
      */
-    protected $useBacktrace = false;
-
-    /**
-     * @var bool
-     */
-    protected $convertCP1251 = false;
+    protected bool $convertCP1251 = false;
 
     /**
      * Массив таймеров выполнения
      * @var array
      */
-    protected $timers = [];
-
-    /**
-     * @var array
-     */
-    protected $additionalAlertEmails = [];
+    protected array $timers = [];
 
     /**
      * @var bool
      */
-    protected $rewriteLogFile = false;
+    protected bool $rewriteLogFile = false;
 
     /**
      * @var int
      */
-    protected $execLogCount = 0;
+    protected int $execLogCount = 0;
 
     /**
      * @var int
      */
-    protected $filePermission = 0;
+    protected int $filePermission = 0644;
 
     /**
      * В свойстве храниться объект класса ILogSql
-     * @var null
+     * @var ?SqlTracker
      */
-    protected $sqlTracker = null;
+    protected ?SqlTracker $sqlTracker = null;
 
-    protected $canWrite = true;
-    protected $writeJson = false;
-    protected $writer = null;
+    protected bool $canWrite = true;
+
+    protected bool $writeJson = false;
+
+    protected ?Writer $writer = null;
 
     /**
      * ILog constructor.
@@ -142,12 +109,14 @@ class ILog
      * @param string $additionalLogDir дополнительная директория для хранения логов
      * @throws \Exception
      */
-    public function __construct(string $code = '', string $additionalLogDir = '')
+    public function __construct(string $code = 'common', string $additionalLogDir = '')
     {
         $this->settings = Settings::getInstance();
         $this->dateFormat = $this->settings->DATE_FORMAT();
-        $this->loggerCode = (!empty($code)) ? str_replace(['/', '\\'], '_', $code) : 'common';
-        $this->identifier = getmypid();
+
+        $code = str_replace(['/', '\\'], '_', $code);
+        $code = str_replace('.', '', $code);
+        $this->loggerCode = $code;
 
         $this->filePermission = $this->prepareFilePermissionMask($this->settings->LOG_FILE_PERMISSION());
 
@@ -185,9 +154,9 @@ class ILog
      * @return bool|string
      * @throws
      */
-    public function initLogDir() : string
+    public function initLogDir(): string
     {
-        if ($this->initLogDir === false) {
+        if (empty($this->initLogDir)) {
             $path = $this->getLogDirPath();
             $day = date('Y-m-d');
             $currentDayLogDir = $path . $day;
@@ -248,7 +217,6 @@ class ILog
 
     /**
      * Метод получает 8-ое представления уровня доступа по переданной строке
-     * @crunch метод является костылем, требует рефакторинга
      * @param $permission
      * @return int
      */
@@ -298,7 +266,7 @@ class ILog
      * Метод позволяет задать дополнительную директорию для логгера
      * @param string $dirName
      */
-    public function setAdditionalDir(string $dirName)
+    public function setAdditionalDir(string $dirName): void
     {
         $dirName = str_replace(['/', '\\'], '', $dirName);
 
@@ -311,12 +279,11 @@ class ILog
      * Метод заставляет логгер перезаписывать файл при каждом новом вызове логирующего метода
      * @return $this
      */
-    public function rewrite(): ILog
+    public function rewrite(): Logger
     {
         $this->rewriteLogFile = true;
         return $this;
     }
-
 
     /**
      * @param $level
@@ -326,9 +293,7 @@ class ILog
      */
     protected function prepareRecordHumanFormat($level, $msg, $context): string
     {
-        $date = '[' . date($this->dateFormat) . ']';
-        $level = '[:' . $level . ']';
-        $pid = '[pid:' . $this->identifier . ']';
+        $date = sprintf('[%s] ', \date($this->dateFormat));
 
         $file = '';
         $message = (!empty($msg)) ? $msg : '';
@@ -340,36 +305,46 @@ class ILog
             if (!empty($execLogMethodFileData)) {
                 $strBacktraceData = implode(':', $execLogMethodFileData);
 
-                // @crunch: маленький костыль для таймера выполнения. чтобы лишний раз не вызывать backtrace();
                 if (is_array($context) && array_key_exists('STOP_POINT', $context) && empty($context['STOP_POINT'])) {
                     $context['STOP_POINT'] = $strBacktraceData;
                 }
 
-                $file = '[' . $strBacktraceData . ']';
+                $file = sprintf('[%s] ', $strBacktraceData);
             }
         }
 
-        if (is_array($context) || is_object($context)) {
-            $logContext = print_r($context, 1);
-        } elseif (is_bool($context)) {
-            $logContext = ($context) ? 'true' : 'false';
-        } elseif (is_null($context)) {
-            $logContext = 'null';
-        } else {
-            $logContext = $context;
+        if (array_key_exists('exception', $context) && $context['exception'] instanceof \Throwable) {
+            $context['exception'] = $this->normalizeException($context['exception']);
         }
+
+        $logContext = var_export($context, true);
 
         $logData = [
             $date,
             $level,
-            $pid,
             $file,
             $message,
             $logContext
         ];
 
-        return str_replace(['{date}', '{level}', '{pid}', '{file}', '{message}', '{context}'], $logData,
-                self::LOG_TEMPLATE) . PHP_EOL;
+        return str_replace(
+                ['{date}', '{level}', '{file}', '{message}', '{context}'],
+                $logData,
+                self::LOG_TEMPLATE
+            );
+    }
+
+    protected function normalizeException(\Throwable $exception): string
+    {
+        return sprintf(
+            "%s(code: %s): %s at %s:%s" . PHP_EOL . "[stacktrace] %s",
+            get_class($exception),
+            $exception->getCode(),
+            $exception->getMessage(),
+            $exception->getFile(),
+            $exception->getLine(),
+            $exception->getTraceAsString()
+        );
     }
 
     /**
@@ -378,12 +353,11 @@ class ILog
      * @param $context
      * @return string
      */
-    public function prepareRecordJsonFormat($level, $msg, $context) : string
+    public function prepareRecordJsonFormat($level, $msg, $context): string
     {
         $logItems = [
             'time' => date($this->dateFormat),
             'level' => $level,
-            'pid' => $this->identifier,
             'msg' => $msg,
             'context' => $context
         ];
@@ -410,52 +384,34 @@ class ILog
     /**
      * Метод формирует сообщение лога согласно шаблону и добавляет сообщение в свойство $this->logData
      * по средствам метода $this->setLogItemAdditionalDir()
-     * @param string $level уровень лога
-     * @param string $msg сообщение
-     * @param $context доп. информация
+     * @param string $level
+     * @param string $msg
+     * @param array $context
      */
-    public function write(string $level, string $msg = '', $context = false)
+    public function write(string $level, string $msg = '', array $context = []): void
     {
-        if ($this->writeJson) {
-            $logString = $this->prepareRecordJsonFormat($level, $msg, $context);
-        } else {
-            $logString = $this->prepareRecordHumanFormat($level, $msg, $context);
-        }
-
+        $logString = ($this->writeJson) ? $this->prepareRecordJsonFormat($level, $msg, $context) : $this->prepareRecordHumanFormat($level, $msg, $context);
 
         if ($this->canWrite) {
 
             if ($this->convertCP1251) {
-                $logString = iconv('windows-1251', 'utf-8', $logString);
+                $logString = \iconv('windows-1251', 'utf-8', $logString);
             }
 
             if ($this->rewriteLogFile && $this->execLogCount === 0) {
                 $this->writer->setFileModeRewrite();
             }
 
+            $logString .= PHP_EOL;
+
             $this->writer->write($logString);
-        }
-
-        // отправка оповещения
-        if (in_array($level, [self::ALERT, self::EMERGENCY, self::CRITICAL])) {
-            $objILogAlert = new ILogAlert($this);
-
-            if (!empty($this->additionalAlertEmails)) {
-                $objILogAlert->setAdditionalEmails($this->additionalAlertEmails);
-            }
-
-            if ($this->writeJson) {
-                $logString = $this->prepareRecordHumanFormat($level, $msg, $context);
-            }
-
-            $objILogAlert->send($logString);
         }
     }
 
     /**
      * @return bool
      */
-    public function getWriteFilePath(): bool
+    public function getWriteFilePath(): string
     {
         return $this->writeFilePath;
     }
@@ -463,7 +419,7 @@ class ILog
     /**
      * @return bool
      */
-    public function getExecPathFile(): bool
+    public function getExecPathFile(): string
     {
         return $this->execPathFile;
     }
@@ -471,32 +427,17 @@ class ILog
     /**
      * @throws \Exception
      */
-    protected function initWriteFilePath()
+    protected function initWriteFilePath(): string
     {
         $this->writeFilePath = $this->getLogDir($this->additionalDir) . $this->getLogFileName();
+
         return $this->writeFilePath;
-    }
-
-    /**
-     * Через этот метод можно установить дополнительный email для получения алертов
-     * @param string $email
-     * @return $this
-     */
-    public function setAlertEmail(string $email): ILog
-    {
-        if (!is_array($email)) {
-            $this->additionalAlertEmails = array_merge($this->additionalAlertEmails, $email);
-        } else {
-            $this->additionalAlertEmails[] = $email;
-        }
-
-        return $this;
     }
 
     /**
      * Метод позволяет включить отладку
      */
-    public function useBacktrace()
+    public function useBacktrace(): void
     {
         $this->useBacktrace = true;
     }
@@ -504,7 +445,7 @@ class ILog
     /**
      * Метод позволяет отключить отладку
      */
-    public function notUseBacktrace()
+    public function notUseBacktrace(): void
     {
         $this->useBacktrace = false;
     }
@@ -516,7 +457,12 @@ class ILog
     public function backtrace(): array
     {
         $return = [];
-        $backtraceData = debug_backtrace(false, 4);
+        $backtraceData = debug_backtrace(limit: 4);
+
+        if (!$backtraceData) {
+            return $return;
+        }
+
         $execMethodRecord = array_pop($backtraceData);
 
         if (!empty($execMethodRecord) && is_array($execMethodRecord)) {
@@ -531,9 +477,9 @@ class ILog
      * Метод создает таймер выполнения с заданым кодом
      * @param string $timerCode
      */
-    public function startTimer(string $timerCode)
+    public function startTimer(string $timerCode): void
     {
-        $objLoggerTimer = new ILogTimer($timerCode);
+        $objLoggerTimer = new Timer($timerCode);
 
         if ($this->useBacktrace) {
             $startPoint = implode(':', $this->backtrace());
@@ -549,7 +495,7 @@ class ILog
      * @param bool $autoStop
      * @return void
      */
-    public function stopTimer(string $timerCode = '', bool $autoStop = false)
+    public function stopTimer(string $timerCode = '', bool $autoStop = false): void
     {
         if (array_key_exists($timerCode, $this->timers)) {
             $currentTimer = $this->timers[$timerCode];
@@ -559,7 +505,7 @@ class ILog
                 $timerData['STOP_POINT'] = '__destruct';
             }
 
-            $this->write(self::INFO, "Timer {$timerData['CODE']}", $timerData);
+            $this->write(LogLevel::INFO, "Timer {$timerData['CODE']}", $timerData);
         }
     }
 
@@ -567,10 +513,10 @@ class ILog
      * Метод создает трекер sql запросов
      * @param string $code
      */
-    public function startSqlTracker(string $code = 'common')
+    public function startSqlTracker(string $code = 'common'): void
     {
         if (is_null($this->sqlTracker)) {
-            $this->sqlTracker = new ILogSql();
+            $this->sqlTracker = new SqlTracker();
         }
 
         $this->sqlTracker->start($code);
@@ -580,9 +526,9 @@ class ILog
      * Метод останавливает трекер sql запросов и записывает результат в лог файл
      * @param string $code
      */
-    public function stopSqlTracker(string $code = 'common')
+    public function stopSqlTracker(string $code = 'common'): void
     {
-        if ($this->sqlTracker instanceof ILogSql) {
+        if ($this->sqlTracker instanceof SqlTracker) {
             $trackerResult = $this->sqlTracker->stop($code);
             $this->logSqlTracker($code, $trackerResult);
         }
@@ -594,51 +540,72 @@ class ILog
      * @param $code
      * @param $data
      */
-    protected function logSqlTracker($code, $data)
+    protected function logSqlTracker($code, $data): void
     {
-        $this->write(self::INFO, "SqlTracker {$code}:", $data);
+        $this->write(LogLevel::INFO, "SqlTracker {$code}:", $data);
+    }
+
+    public function emergency($message, array $context = []): void
+    {
+        $this->log(LogLevel::EMERGENCY, $message, $context);
+    }
+
+    public function alert($message, array $context = []): void
+    {
+        $this->log(LogLevel::ALERT, $message, $context);
+    }
+
+    public function critical($message, array $context = []): void
+    {
+        $this->log(LogLevel::CRITICAL, $message, $context);
+    }
+
+    public function error($message, array $context = []): void
+    {
+        $this->log(LogLevel::ERROR, $message, $context);
+    }
+
+    public function warning($message, array $context = []): void
+    {
+        $this->log(LogLevel::WARNING, $message, $context);
+    }
+
+    public function notice($message, array $context = []): void
+    {
+        $this->log(LogLevel::NOTICE, $message, $context);
+    }
+
+    public function info($message, array $context = []): void
+    {
+        $this->log(LogLevel::INFO, $message, $context);
+    }
+
+    public function debug($message, array $context = []): void
+    {
+        $this->log(LogLevel::DEBUG, $message, $context);
+    }
+
+    public function log($level, $message, array $context = []): void
+    {
+        $this->write($level, $message, $context);
+
+        $this->execLogCount++;
     }
 
     /**
-     * @param string $name
-     * @param array $arguments
-     * @return bool
-     */
-    public function __call(string $name, array $arguments): bool
-    {
-        if ($name === self::DEBUG && $this->settings->DEV_MODE() !== 'Y') {
-            return false;
-        }
-
-        if (array_key_exists($name, self::METHOD_MATCH_LEVEL)) {
-            $logLevel = self::METHOD_MATCH_LEVEL[$name];
-            $this->write(
-                $logLevel,
-                $arguments[0],
-                $arguments[1]
-            );
-            $this->execLogCount++;
-
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * В деструкторе останавливает все незавершенные таймеры и sql трекеры
+     * Деструктор останавливает все незавершенные таймеры и sql-трекеры
      */
     function __destruct()
     {
         if (!empty($this->timers)) {
             foreach ($this->timers as $timerCode => $objTimer) {
-                if ($objTimer instanceof ILogTimer && !$objTimer->isDie()) {
+                if ($objTimer instanceof Timer && !$objTimer->isDie()) {
                     $this->stopTimer($timerCode, true);
                 }
             }
         }
 
-        if (!is_null($this->sqlTracker) && $this->sqlTracker instanceof ILogSql) {
+        if ($this->sqlTracker instanceof SqlTracker) {
             $autoStopTrackersData = $this->sqlTracker->stopAll();
 
             foreach ($autoStopTrackersData as $trackerCode => $trackerItem) {

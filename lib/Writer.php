@@ -1,59 +1,32 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Intensa\Logger;
 
-
 use Intensa\Logger\Tools\Helper;
 
-/**
- * Class Writer
- * @package Intensa\Logger
- */
 class Writer
 {
-    /**
-     *
-     */
     const DEFAULT_MEMORY_LIMIT = 10 * 1024 * 1024;
-    /**
-     *
-     */
+
     const FILE_MODE_APPEND = 'a';
-    /**
-     *
-     */
+
     const FILE_MODE_REWRITE = 'w';
 
-    /**
-     * @var string
-     */
-    protected $filePath = '';
-    /**
-     * @var string
-     */
-    protected $mode;
-    /**
-     * @var bool
-     */
-    protected $initFlag = false;
-    /**
-     * @var
-     */
-    protected $file;
-    /**
-     * @var array
-     */
-    protected $storage = [];
-    /**
-     * @var int
-     */
-    protected $memoryLimitValue = 0;
-    /**
-     * @var bool
-     */
-    protected $enableFlush = true;
+    protected string $filePath = '';
 
+    protected string $mode;
+
+    protected bool $initFlag = false;
+
+    protected $file;
+
+    protected array $storage = [];
+
+    protected float $memoryLimitValue = 0;
+
+    protected bool $enableFlush = true;
 
     /**
      * Writer constructor.
@@ -69,23 +42,17 @@ class Writer
      * Устанавливает режим w.
      * Необходим для корректной работы логгера в режиме перезаписи файла
      */
-    public function setFileModeRewrite()
+    public function setFileModeRewrite(): void
     {
         $this->mode = self::FILE_MODE_REWRITE;
     }
 
-    /**
-     *
-     */
-    public function disableFlush()
+    public function disableFlush(): void
     {
         $this->enableFlush = false;
     }
 
-    /**
-     * @param $data
-     */
-    public function write($data)
+    public function write(string $data): void
     {
         $this->storage[] = $data;
 
@@ -94,19 +61,13 @@ class Writer
         }
     }
 
-    /**
-     *
-     */
-    protected function init()
+    protected function init(): void
     {
         $this->file = fopen($this->filePath, $this->mode);
         $this->initFlag = true;
     }
 
-    /**
-     * @return float|int
-     */
-    protected function getMemoryLimit()
+    protected function getMemoryLimit(): float|int
     {
         if (empty($this->memoryLimitValue))  {
             if ($memoryLimit = Helper::convertToBytes(ini_get('memory_limit'))) {
@@ -119,20 +80,14 @@ class Writer
         return $this->memoryLimitValue;
     }
 
-    /**
-     *
-     */
-    protected function resetFileMode()
+    protected function resetFileMode(): void
     {
         if ($this->mode === self::FILE_MODE_REWRITE) {
             $this->mode = self::FILE_MODE_APPEND;
         }
     }
 
-    /**
-     *
-     */
-    protected function flush()
+    protected function flush(): void
     {
         if (memory_get_usage(true) > $this->getMemoryLimit()) {
             $this->writeToStream();
@@ -140,10 +95,7 @@ class Writer
         }
     }
 
-    /**
-     *
-     */
-    protected function writeToStream()
+    protected function writeToStream(): void
     {
         if (!$this->initFlag) {
             $this->init();
@@ -154,9 +106,6 @@ class Writer
         $this->resetFileMode();
     }
 
-    /**
-     *
-     */
     public function __destruct()
     {
         $this->writeToStream();

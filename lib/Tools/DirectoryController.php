@@ -1,14 +1,15 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Intensa\Logger\Tools;
 
-use Intensa\Logger\Settings;
+use Intensa\Logger\Tools\Settings;
 
 class DirectoryController
 {
-    protected $logDirPath = false;
-    protected $showAllFiles = false;
+    protected string $logDirPath = '';
+    protected bool $showAllFiles = false;
 
     /**
      * @throws \Exception

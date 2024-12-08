@@ -1,15 +1,16 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Intensa\Logger\Tools;
 
-use Intensa\Logger\Settings;
+use Intensa\Logger\Tools\Settings;
 
 class LogCleaner
 {
-    protected $clearTime = 0;
-    protected $rootLogDirectory = '';
-    protected $allowExecute = false;
+    protected int $clearTime = 0;
+    protected string $rootLogDirectory = '';
+    protected bool $allowExecute = false;
 
     public function __construct()
     {
@@ -95,9 +96,7 @@ class LogCleaner
                     $return[$dateKey] = $item['path'];
                 }
             }
-        } catch (\Exception $e) {
-
-        }
+        } catch (\Exception $e) {}
 
         return $return;
     }
@@ -120,7 +119,7 @@ class LogCleaner
 
     protected function isAllowDirectory($path): bool
     {
-        return strpos($path, $this->rootLogDirectory) !== false;
+        return str_contains($path, $this->rootLogDirectory);
     }
 
     public function isOldDirectory($timeModify): bool
@@ -135,8 +134,8 @@ class LogCleaner
 
             if ($selfObj->allow()) {
                 $oldDirectories = $selfObj->getOldLogsDirectories();
-
-                if (!empty($oldDirectories) && is_array($oldDirectories)) {
+                var_dump($oldDirectories);
+                if (!empty($oldDirectories)) {
                     foreach ($oldDirectories as $item) {
                         $selfObj->deleteDirectory($item);
                     }
