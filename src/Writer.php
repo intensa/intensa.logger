@@ -1,13 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Intensa\Logger;
 
 use Intensa\Logger\Tools\Helper;
 
-/**
- * Class Writer
- * @package Intensa\Logger
- */
 class Writer
 {
     const DEFAULT_MEMORY_LIMIT = 10 * 1024 * 1024;
@@ -16,39 +14,18 @@ class Writer
 
     const FILE_MODE_REWRITE = 'w';
 
-    /**
-     * @var string
-     */
     protected string $filePath = '';
 
-    /**
-     * @var string
-     */
     protected string $mode;
 
-    /**
-     * @var bool
-     */
     protected bool $initFlag = false;
 
-    /**
-     * @var
-     */
     protected $file;
 
-    /**
-     * @var array
-     */
     protected array $storage = [];
 
-    /**
-     * @var int
-     */
-    protected int $memoryLimitValue = 0;
+    protected float $memoryLimitValue = 0;
 
-    /**
-     * @var bool
-     */
     protected bool $enableFlush = true;
 
     /**

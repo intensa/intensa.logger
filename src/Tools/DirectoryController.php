@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Intensa\Logger\Tools;
 
 use Intensa\Logger\Tools\Settings;

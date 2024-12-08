@@ -1,7 +1,8 @@
 <?php
 
-namespace Intensa\Logger;
+declare(strict_types=1);
 
+namespace Intensa\Logger;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
@@ -55,9 +56,9 @@ class Logger implements LoggerInterface
     protected string $writeFilePath = '';
 
     /**
-     * @var bool
+     * @var string
      */
-    protected bool $execPathFile = false;
+    protected string $execPathFile = '';
 
     /**
      * @var bool
@@ -316,7 +317,7 @@ class Logger implements LoggerInterface
             $context['exception'] = $this->normalizeException($context['exception']);
         }
 
-        $logContext = var_export($context, 1);
+        $logContext = var_export($context, true);
 
         $logData = [
             $date,
@@ -410,7 +411,7 @@ class Logger implements LoggerInterface
     /**
      * @return bool
      */
-    public function getWriteFilePath(): bool
+    public function getWriteFilePath(): string
     {
         return $this->writeFilePath;
     }
@@ -418,7 +419,7 @@ class Logger implements LoggerInterface
     /**
      * @return bool
      */
-    public function getExecPathFile(): bool
+    public function getExecPathFile(): string
     {
         return $this->execPathFile;
     }
@@ -456,7 +457,7 @@ class Logger implements LoggerInterface
     public function backtrace(): array
     {
         $return = [];
-        $backtraceData = debug_backtrace(false, 4);
+        $backtraceData = debug_backtrace(limit: 4);
 
         if (!$backtraceData) {
             return $return;

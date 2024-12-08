@@ -153,26 +153,6 @@ $arAllOptions = [
         ['checkbox']
     ],
     [
-        'CEVENT_TYPE',
-        getMessage('CEVENT_TYPE'),
-        COption::GetOptionString(
-            LOGGER_MODULE_NAME,
-            'CEVENT_TYPE',
-            \Intensa\Logger\Tools\Settings::getInstance()->getDefaultOptionValue('CEVENT_TYPE')
-        ),
-        ['text']
-    ],
-    [
-        'CEVENT_MESSAGE',
-        getMessage('CEVENT_MESSAGE'),
-        COption::GetOptionString(
-            LOGGER_MODULE_NAME,
-            'CEVENT_MESSAGE',
-            \Intensa\Logger\Tools\Settings::getInstance()->getDefaultOptionValue('CEVENT_MESSAGE')
-        ),
-        ['text']
-    ],
-    [
         'USE_CP1251',
         getMessage('USE_CP1251'),
         COption::GetOptionString(
@@ -181,16 +161,6 @@ $arAllOptions = [
             \Intensa\Logger\Tools\Settings::getInstance()->getDefaultOptionValue('USE_CP1251')
         ),
         ['checkbox']
-    ],
-    [
-        'ALERT_EMAIL',
-        getMessage('ALERT_EMAIL'),
-        COption::GetOptionString(
-            LOGGER_MODULE_NAME,
-            'ALERT_EMAIL',
-            \Intensa\Logger\Tools\Settings::getInstance()->getDefaultOptionValue('ALERT_EMAIL')
-        ),
-        ['text']
     ],
     [
         'WRITE_JSON',
