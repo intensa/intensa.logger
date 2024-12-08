@@ -47,7 +47,7 @@ class intensa_logger extends CModule
         $createDir = $this->createDirectory();
         $this->checkPermission($createDir);
         $this->createAccessFile($createDir);
-        $this->createSendEvent();
+
         $this->installAgents();
 
         \Intensa\Logger\Tools\Settings::getInstance()->installOptions();
@@ -84,7 +84,7 @@ class intensa_logger extends CModule
         $dirPath = $_SERVER['DOCUMENT_ROOT'] . '/logs/';
 
         if (!file_exists($dirPath)) {
-            $mkdir = mkdir($dirPath, 0777);
+            $mkdir = mkdir($dirPath, 0775);
 
             if (!$mkdir) {
                 $this->errors[] = 'Ошибка создания основной директории для логов ' . $dirPath;
@@ -92,7 +92,7 @@ class intensa_logger extends CModule
             }
         }
 
-        chmod($dirPath, 0777);
+        chmod($dirPath, 0775);
 
         return $dirPath;
     }
@@ -112,87 +112,6 @@ class intensa_logger extends CModule
             return true;
         } else {
             $this->errors[] = 'Проблема с правами директории ' . $file;
-        }
-    }
-
-    public function createSendEvent() : bool
-    {
-        global $APPLICATION;
-
-        $result = false;
-        $defaultEventType = self::DEFAULT_EVENT_TYPE;
-        $arActiveSitesIDs = [];
-
-        $rsSite = \CSite::GetList($by = "sort", $order = "desc", ['ACTIVE' => 'Y']);
-
-        while ($site = $rsSite->Fetch()) {
-            $arActiveSitesIDs[] = $site['ID'];
-        }
-
-        $objCEventType = new \CEventType;
-
-        $filterCEventType = ['TYPE_ID' => $defaultEventType];
-        $objResultCEventType = $objCEventType->GetList($filterCEventType);
-
-        if ($eventType = $objResultCEventType->Fetch()) {
-            $createType = $eventType['ID'];
-        } else {
-            $createType = $objCEventType->Add([
-                'LID' => $arActiveSitesIDs,
-                'EVENT_NAME' => $defaultEventType,
-                'NAME' => 'intensa.logger',
-            ]);
-        }
-
-        if ($createType) {
-            $objCEventMessage = new \CEventMessage;
-            $objResultCEventMessage = $objCEventMessage->GetList($by = 'id', $order = 'desc',
-                ['TYPE_ID' => $defaultEventType]);
-
-            if ($objResultCEventMessage->Fetch()) {
-                $createMessage = true;
-            } else {
-                $createMessage = $objCEventMessage->Add([
-                    'ACTIVE' => 'Y',
-                    'EVENT_NAME' => $defaultEventType,
-                    'LID' => $arActiveSitesIDs,
-                    'EMAIL_FROM' => '#DEFAULT_EMAIL_FROM#',
-                    'EMAIL_TO' => '#EMAIL_TO#',
-                    'BCC' => '#BCC#',
-                    'SUBJECT' => GetMessage('CEVENT_SUBJECT'),
-                    'MESSAGE' => GetMessage('CEVENT_MESSAGE'),
-                ]);
-            }
-
-            if ($createMessage) {
-                $result = true;
-            }
-        }
-
-        $appErrors = $APPLICATION->LAST_ERROR;
-
-        if (!empty($appErrors)) {
-            $this->errors[] = 'Создание почтового события: ' . SITE_ID . $appErrors->msg;
-        }
-
-        return $result;
-    }
-
-    public function removeSendEvent()
-    {
-        $eventType = self::DEFAULT_EVENT_TYPE;
-
-        if (!empty($eventType)) {
-            $objCEventMessage = new \CEventMessage;
-            $objResultCEventMessage = $objCEventMessage->GetList($by = 'id', $order = 'desc',
-                ['TYPE_ID' => $eventType]);
-
-            while($eventMessage = $objResultCEventMessage->Fetch()) {
-                $objCEventMessage->Delete($eventMessage['ID']);
-            }
-
-            $objCEventType = new \CEventType;
-            $objCEventType->Delete($eventType);
         }
     }
 }

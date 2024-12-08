@@ -1,14 +1,11 @@
 <?php
+declare(strict_types=1);
 
 namespace Intensa\Logger;
 
-/**
- * Class ILogSql
- * @package Intensa\Logger
- */
 class SqlTracker
 {
-    protected $connection = null;
+    protected \Bitrix\Main\DB\Connection|\Bitrix\Main\Data\Connection|null $connection = null;
     protected array $trackersData = [];
     protected array $trackerPull = [];
 
@@ -21,7 +18,7 @@ class SqlTracker
      * Запускает отслеживание запросов для переданного кода.
      * @param string $code
      */
-    public function start(string $code)
+    public function start(string $code): void
     {
         if (!empty($this->trackerPull)) {
 
@@ -43,9 +40,9 @@ class SqlTracker
     /**
      * Добавляет трекер в пулл трекеров
      * @param string $code
-     * @param $tracker
+     * @param \Bitrix\Main\Diag\SqlTracker $tracker
      */
-    protected function setTracker(string $code, $tracker)
+    protected function setTracker(string $code, \Bitrix\Main\Diag\SqlTracker $tracker): void
     {
         $this->trackerPull[$code] = [
             'code' => $code,
@@ -81,7 +78,7 @@ class SqlTracker
     /**
      * Получение трекера по коду
      * @param string $code
-     * @return ?array
+     * @return array
      */
     public function getTracker(string $code): array
     {
@@ -98,7 +95,7 @@ class SqlTracker
      * Устанавливает флаг завершенности трекера
      * @param string $code
      */
-    protected function finishTracker(string $code)
+    protected function finishTracker(string $code): void
     {
         if (array_key_exists($code, $this->trackerPull)) {
             $this->trackerPull[$code]['finish'] = true;
@@ -110,7 +107,7 @@ class SqlTracker
      * @param string $code
      * @param array $data
      */
-    protected function setTrackerData(string $code, array $data)
+    protected function setTrackerData(string $code, array $data): void
     {
         if (array_key_exists($code, $this->trackerPull)) {
             $this->trackerPull[$code]['data'] = $data;

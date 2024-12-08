@@ -2,6 +2,7 @@
 
 namespace Intensa\Logger;
 
+
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Intensa\Logger\Tools\Settings;
@@ -16,7 +17,7 @@ class Logger implements LoggerInterface
     /**
      * Шаблон записей в лог-файле
      */
-    const LOG_TEMPLATE = '{date}{level}{pid}{file} {message} {context}';
+    const LOG_TEMPLATE = '{date}{file}{level}: {message} {context}';
 
     /**
      * @var string
@@ -75,11 +76,6 @@ class Logger implements LoggerInterface
     protected array $timers = [];
 
     /**
-     * @var array
-     */
-    protected array $additionalAlertEmails = [];
-
-    /**
      * @var bool
      */
     protected bool $rewriteLogFile = false;
@@ -112,12 +108,14 @@ class Logger implements LoggerInterface
      * @param string $additionalLogDir дополнительная директория для хранения логов
      * @throws \Exception
      */
-    public function __construct(string $code = '', string $additionalLogDir = '')
+    public function __construct(string $code = 'common', string $additionalLogDir = '')
     {
         $this->settings = Settings::getInstance();
         $this->dateFormat = $this->settings->DATE_FORMAT();
-        $this->loggerCode = (!empty($code)) ? str_replace(['/', '\\'], '_', $code) : 'common';
-        $this->identifier = getmypid();
+
+        $code = str_replace(['/', '\\'], '_', $code);
+        $code = str_replace('.', '', $code);
+        $this->loggerCode = $code;
 
         $this->filePermission = $this->prepareFilePermissionMask($this->settings->LOG_FILE_PERMISSION());
 
@@ -218,7 +216,6 @@ class Logger implements LoggerInterface
 
     /**
      * Метод получает 8-ое представления уровня доступа по переданной строке
-     * @crunch метод является костылем, требует рефакторинга
      * @param $permission
      * @return int
      */
@@ -268,7 +265,7 @@ class Logger implements LoggerInterface
      * Метод позволяет задать дополнительную директорию для логгера
      * @param string $dirName
      */
-    public function setAdditionalDir(string $dirName)
+    public function setAdditionalDir(string $dirName): void
     {
         $dirName = str_replace(['/', '\\'], '', $dirName);
 
@@ -295,9 +292,7 @@ class Logger implements LoggerInterface
      */
     protected function prepareRecordHumanFormat($level, $msg, $context): string
     {
-        $date = '[' . date($this->dateFormat) . ']';
-        $level = '[:' . $level . ']';
-        $pid = '[pid:' . $this->identifier . ']';
+        $date = sprintf('[%s] ', \date($this->dateFormat));
 
         $file = '';
         $message = (!empty($msg)) ? $msg : '';
@@ -309,12 +304,11 @@ class Logger implements LoggerInterface
             if (!empty($execLogMethodFileData)) {
                 $strBacktraceData = implode(':', $execLogMethodFileData);
 
-                // @crunch: маленький костыль для таймера выполнения. чтобы лишний раз не вызывать backtrace();
                 if (is_array($context) && array_key_exists('STOP_POINT', $context) && empty($context['STOP_POINT'])) {
                     $context['STOP_POINT'] = $strBacktraceData;
                 }
 
-                $file = '[' . $strBacktraceData . ']';
+                $file = sprintf('[%s] ', $strBacktraceData);
             }
         }
 
@@ -323,26 +317,16 @@ class Logger implements LoggerInterface
         $logData = [
             $date,
             $level,
-            $pid,
             $file,
             $message,
             $logContext
         ];
 
         return str_replace(
-                ['{date}', '{level}', '{pid}', '{file}', '{message}', '{context}'],
+                ['{date}', '{level}', '{file}', '{message}', '{context}'],
                 $logData,
                 self::LOG_TEMPLATE
             );
-        //{date}{level}{pid}{file} {message} {context}
-
-    /*    return sprintf('%s%s%s%s %s %s',$date,
-            $level,
-            $pid,
-            $file,
-            $message,
-            $logContext);*/
-
     }
 
     /**
@@ -383,17 +367,13 @@ class Logger implements LoggerInterface
     /**
      * Метод формирует сообщение лога согласно шаблону и добавляет сообщение в свойство $this->logData
      * по средствам метода $this->setLogItemAdditionalDir()
-     * @param string $level уровень лога
-     * @param string $msg сообщение
-     * @param $context доп. информация
+     * @param string $level
+     * @param string $msg
+     * @param array $context
      */
-    public function write(string $level, string $msg = '', $context = false)
+    public function write(string $level, string $msg = '', array $context = []): void
     {
-        if ($this->writeJson) {
-            $logString = $this->prepareRecordJsonFormat($level, $msg, $context);
-        } else {
-            $logString = $this->prepareRecordHumanFormat($level, $msg, $context);
-        }
+        $logString = ($this->writeJson) ? $this->prepareRecordJsonFormat($level, $msg, $context) : $this->prepareRecordHumanFormat($level, $msg, $context);
 
         if ($this->canWrite) {
 
@@ -408,21 +388,6 @@ class Logger implements LoggerInterface
             $logString .= PHP_EOL;
 
             $this->writer->write($logString);
-        }
-
-        // отправка оповещения
-        if (in_array($level, [LogLevel::ALERT, LogLevel::EMERGENCY, LogLevel::CRITICAL])) {
-            $objILogAlert = new ILogAlert($this);
-
-            if (!empty($this->additionalAlertEmails)) {
-                $objILogAlert->setAdditionalEmails($this->additionalAlertEmails);
-            }
-
-            if ($this->writeJson) {
-                $logString = $this->prepareRecordHumanFormat($level, $msg, $context);
-            }
-
-            $objILogAlert->send($logString);
         }
     }
 
@@ -445,32 +410,28 @@ class Logger implements LoggerInterface
     /**
      * @throws \Exception
      */
-    protected function initWriteFilePath()
+    protected function initWriteFilePath(): string
     {
         $this->writeFilePath = $this->getLogDir($this->additionalDir) . $this->getLogFileName();
+
         return $this->writeFilePath;
     }
 
     /**
+     * @deprecated
      * Через этот метод можно установить дополнительный email для получения алертов
-     * @param string $email
+     * @param string|array $email
      * @return $this
      */
     public function setAlertEmail($email): Logger
     {
-        if (!is_array($email)) {
-            $this->additionalAlertEmails = array_merge($this->additionalAlertEmails, $email);
-        } else {
-            $this->additionalAlertEmails[] = $email;
-        }
-
         return $this;
     }
 
     /**
      * Метод позволяет включить отладку
      */
-    public function useBacktrace()
+    public function useBacktrace(): void
     {
         $this->useBacktrace = true;
     }
@@ -478,7 +439,7 @@ class Logger implements LoggerInterface
     /**
      * Метод позволяет отключить отладку
      */
-    public function notUseBacktrace()
+    public function notUseBacktrace(): void
     {
         $this->useBacktrace = false;
     }
@@ -491,6 +452,11 @@ class Logger implements LoggerInterface
     {
         $return = [];
         $backtraceData = debug_backtrace(false, 4);
+
+        if (!$backtraceData) {
+            return $return;
+        }
+
         $execMethodRecord = array_pop($backtraceData);
 
         if (!empty($execMethodRecord) && is_array($execMethodRecord)) {
@@ -505,7 +471,7 @@ class Logger implements LoggerInterface
      * Метод создает таймер выполнения с заданым кодом
      * @param string $timerCode
      */
-    public function startTimer(string $timerCode)
+    public function startTimer(string $timerCode): void
     {
         $objLoggerTimer = new Timer($timerCode);
 
@@ -523,7 +489,7 @@ class Logger implements LoggerInterface
      * @param bool $autoStop
      * @return void
      */
-    public function stopTimer(string $timerCode = '', bool $autoStop = false)
+    public function stopTimer(string $timerCode = '', bool $autoStop = false): void
     {
         if (array_key_exists($timerCode, $this->timers)) {
             $currentTimer = $this->timers[$timerCode];
@@ -541,7 +507,7 @@ class Logger implements LoggerInterface
      * Метод создает трекер sql запросов
      * @param string $code
      */
-    public function startSqlTracker(string $code = 'common')
+    public function startSqlTracker(string $code = 'common'): void
     {
         if (is_null($this->sqlTracker)) {
             $this->sqlTracker = new SqlTracker();
@@ -554,7 +520,7 @@ class Logger implements LoggerInterface
      * Метод останавливает трекер sql запросов и записывает результат в лог файл
      * @param string $code
      */
-    public function stopSqlTracker(string $code = 'common')
+    public function stopSqlTracker(string $code = 'common'): void
     {
         if ($this->sqlTracker instanceof SqlTracker) {
             $trackerResult = $this->sqlTracker->stop($code);
@@ -568,52 +534,52 @@ class Logger implements LoggerInterface
      * @param $code
      * @param $data
      */
-    protected function logSqlTracker($code, $data)
+    protected function logSqlTracker($code, $data): void
     {
         $this->write(LogLevel::INFO, "SqlTracker {$code}:", $data);
     }
 
-    public function emergency($message, array $context = [])
+    public function emergency($message, array $context = []): void
     {
         $this->log(LogLevel::EMERGENCY, $message, $context);
     }
 
-    public function alert($message, array $context = [])
+    public function alert($message, array $context = []): void
     {
         $this->log(LogLevel::ALERT, $message, $context);
     }
 
-    public function critical($message, array $context = [])
+    public function critical($message, array $context = []): void
     {
         $this->log(LogLevel::CRITICAL, $message, $context);
     }
 
-    public function error($message, array $context = [])
+    public function error($message, array $context = []): void
     {
         $this->log(LogLevel::ERROR, $message, $context);
     }
 
-    public function warning($message, array $context = [])
+    public function warning($message, array $context = []): void
     {
         $this->log(LogLevel::WARNING, $message, $context);
     }
 
-    public function notice($message, array $context = [])
+    public function notice($message, array $context = []): void
     {
         $this->log(LogLevel::NOTICE, $message, $context);
     }
 
-    public function info($message, array $context = [])
+    public function info($message, array $context = []): void
     {
         $this->log(LogLevel::INFO, $message, $context);
     }
 
-    public function debug($message, array $context = [])
+    public function debug($message, array $context = []): void
     {
         $this->log(LogLevel::DEBUG, $message, $context);
     }
 
-    public function log($level, $message, array $context = [])
+    public function log($level, $message, array $context = []): void
     {
         $this->write($level, $message, $context);
 
@@ -621,7 +587,7 @@ class Logger implements LoggerInterface
     }
 
     /**
-     * В деструкторе останавливает все незавершенные таймеры и sql трекеры
+     * Деструктор останавливает все незавершенные таймеры и sql-трекеры
      */
     function __destruct()
     {

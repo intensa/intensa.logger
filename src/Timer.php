@@ -1,40 +1,23 @@
 <?php
+declare(strict_types=1);
 
 namespace Intensa\Logger;
 
-/**
- * Class Timer
- * @package Intensa\Logger
- */
+
 class Timer
 {
-    /**
-     * @var string
-     */
     protected string $timerCode = '';
-    /**
-     * @var int
-     */
-    protected int $timeStart = 0;
-    /**
-     * @var int
-     */
-    protected int $timeEnd = 0;
-    /**
-     * @var int
-     */
-    protected int $execTime = 0;
-    /**
-     * @var bool
-     */
+
+    protected float|int $timeStart = 0;
+
+    protected float|int $timeEnd = 0;
+
+    protected float|int $execTime = 0;
+
     protected bool $die = false;
-    /**
-     * @var string
-     */
+
     protected string $startPoint = '';
-    /**
-     * @var string
-     */
+
     protected string $endPoint = '';
 
     /**
@@ -51,7 +34,7 @@ class Timer
      * @param string $startPoint
      * @return void
      */
-    public function setStartPoint(string $startPoint)
+    public function setStartPoint(string $startPoint): void
     {
         $this->startPoint = $startPoint;
     }
@@ -60,7 +43,7 @@ class Timer
      * @param string $endPoint
      * @return void
      */
-    public function setEndPoint(string $endPoint)
+    public function setEndPoint(string $endPoint): void
     {
         $this->endPoint = $endPoint;
     }
@@ -92,8 +75,8 @@ class Timer
     {
         $data = [
             'CODE' => $this->timerCode,
-            'START_TIME' => date('Y-m-d H:i:s.u', $this->timeStart),
-            'STOP_TIME' => date('Y-m-d H:i:s.u', $this->timeEnd),
+            'START_TIME' => date('Y-m-d H:i:s.u', (int)$this->timeStart),
+            'STOP_TIME' => date('Y-m-d H:i:s.u', (int)$this->timeEnd),
             'EXEC_TIME' => number_format($this->execTime, 9),
         ];
 

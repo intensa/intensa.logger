@@ -6,7 +6,7 @@ namespace Intensa\Logger\Tools;
 
 class Helper
 {
-    public static function convertToBytes($val)
+    public static function convertToBytes($val): bool|int
     {
         if (!is_string($val)) {
             return false;
