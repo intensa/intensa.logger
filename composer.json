@@ -11,7 +11,12 @@
     ],
     "autoload": {
         "psr-4": {
-            "Intensa\\Logger\\": "src/"
+            "Intensa\\Logger\\": "lib/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
         }
     },
     "require-dev": {
