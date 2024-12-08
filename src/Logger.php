@@ -312,6 +312,10 @@ class Logger implements LoggerInterface
             }
         }
 
+        if (array_key_exists('exception', $context) && $context['exception'] instanceof \Throwable) {
+            $context['exception'] = $this->normalizeException($context['exception']);
+        }
+
         $logContext = var_export($context, 1);
 
         $logData = [
@@ -329,6 +333,19 @@ class Logger implements LoggerInterface
             );
     }
 
+    protected function normalizeException(\Throwable $exception): string
+    {
+        return sprintf(
+            "%s(code: %s): %s at %s:%s" . PHP_EOL . "[stacktrace] %s",
+            get_class($exception),
+            $exception->getCode(),
+            $exception->getMessage(),
+            $exception->getFile(),
+            $exception->getLine(),
+            $exception->getTraceAsString()
+        );
+    }
+
     /**
      * @param $level
      * @param $msg
@@ -340,7 +357,6 @@ class Logger implements LoggerInterface
         $logItems = [
             'time' => date($this->dateFormat),
             'level' => $level,
-            'pid' => $this->identifier,
             'msg' => $msg,
             'context' => $context
         ];
@@ -415,17 +431,6 @@ class Logger implements LoggerInterface
         $this->writeFilePath = $this->getLogDir($this->additionalDir) . $this->getLogFileName();
 
         return $this->writeFilePath;
-    }
-
-    /**
-     * @deprecated
-     * Через этот метод можно установить дополнительный email для получения алертов
-     * @param string|array $email
-     * @return $this
-     */
-    public function setAlertEmail($email): Logger
-    {
-        return $this;
     }
 
     /**
